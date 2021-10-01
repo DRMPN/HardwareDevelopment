@@ -1,2 +1,10 @@
 # ignore software tools
 /nand2tetris/tools
+
+# ignore test and demo projects
+/nand2tetris/projects/00
+/nand2tetris/projects/demo
+
+# ignore software development related projects
+/nand2tetris/projects/0[7-9]
+/nand2tetris/projects/1[0-3]
