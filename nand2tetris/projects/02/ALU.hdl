@@ -42,5 +42,42 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+
+    
+    //compute 'zx' 'zy'
+    Mux16 (a=x, b=false, sel=zx, out=ifZX);
+    Mux16 (a=y, b=false, sel=zy, out=ifZY);
+
+    // compute negation based on 'zx' 'zy'
+    Not16 (in=ifZX, out=notX);
+    Not16 (in=ifZY, out=notY);
+
+    // select ... based on 'nz' 'ny'
+    Mux16 (a=ifZX, b=notX, sel=nx, out=ifNX);
+    Mux16 (a=ifZY, b=notY, sel=ny, out=ifNY);
+
+    // compute conjunction and addition based on 'nz' 'ny'
+    And16 (a=ifNX, b=ifNY, out=andXY);
+    Add16 (a=ifNX, b=ifNY, out=addXY);    
+
+
+    // select to do either addition or conjunction based on 'f'
+    Mux16 (a=andXY, b=addXY, sel=f, out=fXY);
+
+    // compute negation of f
+    Not16 (in=fXY, out=notfXY);
+
+
+    // select to either do or do not negate output based on 'no'
+    Mux16 (a=fXY, b=notfXY, sel=no, out=out, out[0..7]=lout, out[8..15]=rout, out[15]=nout);
+
+
+    // compute zr
+    Or8Way (in=lout, out=lor);
+    Or8Way (in=rout, out=ror);
+    Or (a=lor, b=ror, out=lror);
+
+    // select zr and ng
+    Mux (a=true, b=false, sel=lror, out=zr);
+    Mux (a=false, b=true, sel=nout, out=ng); 
 }
