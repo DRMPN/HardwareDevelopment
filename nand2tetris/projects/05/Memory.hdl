@@ -27,5 +27,25 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+
+    // load to mem or screen
+    DMux (in=load, sel=address[14], a=selM, b=selS);
+
+    // 0 - 16383
+    RAM16K (in=in, load=selM, address=address[0..13], out=outM);
+    
+    // 16384 - 24575
+    Screen (in=in, load=selS, address=address[0..12], out=outS);
+    
+    // 24576
+    Keyboard (out=outK);
+
+    // out for mem or screen
+    Mux16 (a=outM, b=outS, sel=address[14], out=outMS);
+
+    // fetch key?
+    And (a=address[14], b=address[13], out=outSel);
+
+    // key or screen
+    Mux16 (a=outMS, b=outK, sel=outSel, out=out);
 }
