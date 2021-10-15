@@ -39,5 +39,55 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+
+
+    //.............................................
+    // A-register
+    
+    // A instruction 
+    Not (in=instruction[15], out=AloadA);
+
+    // C instruction
+    And (a=instruction[15], b=instruction[5], out=AloadC);
+
+    // decide whether to load A register or not
+    Or (a=AloadA, b=AloadC, out=loadA);
+
+    // something with selector
+
+    Mux16 (a=instruction, b=aluToMuxA, sel=false, out=muxA);
+
+    ARegister (in=muxA, load=loadA, out=regAtoMux, out[0..14]=addressM, out=regAtoPC);
+
+    //.............................................
+
+
+    //.............................................
+    // D-register
+
+    Mux16 (a=regAtoMux, b=inM, sel=instruction[12], out=muxD);
+
+    DRegister (in=aluToRegD, load=instruction[4], out=regD);
+
+    //.............................................
+
+
+    //.............................................
+    // ALU
+
+    // something with zero and negate pins
+
+    ALU (x=regD, y=muxD, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outM, zr=aluZero, ng=aluNeg, out=aluToRegD, out=aluToMuxA);
+
+    //.............................................
+
+
+    //.............................................
+    // PC
+    
+    // guess logic to jump
+
+    PC (in=regAtoPC, load=false, inc=true, reset=reset, out[0..14]=pc);
+
+    //.............................................
 }
