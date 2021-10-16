@@ -53,9 +53,10 @@ CHIP CPU {
     // decide whether to load A register or not
     Or (a=AloadA, b=AloadC, out=loadA);
 
-    // something with selector
+    // TODO check correctness
+    And (a=instruction[15], b=instruction[5], out=CloadA);
 
-    Mux16 (a=instruction, b=aluToMuxA, sel=false, out=muxA);
+    Mux16 (a=instruction, b=aluToMuxA, sel=CloadA, out=muxA);
 
     ARegister (in=muxA, load=loadA, out=regAtoMux, out[0..14]=addressM, out=regAtoPC);
 
@@ -67,7 +68,10 @@ CHIP CPU {
 
     Mux16 (a=regAtoMux, b=inM, sel=instruction[12], out=muxD);
 
-    DRegister (in=aluToRegD, load=instruction[4], out=regD);
+    // TODO check correctness c instruction
+    And (a=instruction[15], b=instruction[4], out=DloadC);
+
+    DRegister (in=aluToRegD, load=DloadC, out=regD);
 
     //.............................................
 
@@ -75,7 +79,7 @@ CHIP CPU {
     //.............................................
     // ALU
 
-    // something with zero and negate pins
+    // TODO something with zero and negate pins
 
     ALU (x=regD, y=muxD, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outM, zr=aluZero, ng=aluNeg, out=aluToRegD, out=aluToMuxA);
 
@@ -85,9 +89,16 @@ CHIP CPU {
     //.............................................
     // PC
     
-    // guess logic to jump
+    // TODO guess I should write some logic for jumps
+    Or (a=instruction[0], b=instruction[1], out=isJump);
+    Or (a=isJump, b=instruction[2], out=maybeJump);
+    And (a=instruction[15], b=maybeJump, out=ctrlJump);
 
-    PC (in=regAtoPC, load=false, inc=true, reset=reset, out[0..14]=pc);
+    PC (in=regAtoPC, load=ctrlJump, inc=true, reset=reset, out[0..14]=pc);
 
     //.............................................
+
+    // TODO
+    // decide whether write to memory or not
+    And (a=instruction[15], b=instruction[3], out=writeM);
 }
