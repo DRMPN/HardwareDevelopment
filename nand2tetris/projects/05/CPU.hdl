@@ -90,9 +90,40 @@ CHIP CPU {
     // PC
     
     // TODO guess I should write some logic for jumps
-    Or (a=instruction[0], b=instruction[1], out=isJump);
-    Or (a=isJump, b=instruction[2], out=maybeJump);
-    And (a=instruction[15], b=maybeJump, out=ctrlJump);
+    // Or (a=instruction[0], b=instruction[1], out=isJump);
+    // Or (a=isJump, b=instruction[2], out=maybeJump);
+    // And (a=instruction[15], b=maybeJump, out=ctrlJump);
+
+
+    Not (in=aluZero, out=notAluZero);
+    Not (in=aluNeg, out=notAluNeg);
+
+    // TODO remove placeholder
+    Not (in=false, out=RENAME);
+
+    // b - JGT
+    Or (a=aluZero, b=aluNeg, out=orJGT);
+    Not (in=orJGT, out=jgt);
+
+    // c - JEQ
+    And (a=aluZero, b=aluZero, out=jeq);
+
+    // d - JGE
+    Or (a=aluZero, b=notAluZero, out=orJGE);
+    And (a=orJGE, b=notAluNeg, out=jge);
+
+    // e - JLT
+    And (a=notAluZero, b=aluNeg, out=jlt);
+
+    // f - JNE
+    Or (a=jgt, b=jlt, out=jne);
+
+    // g - JLE
+    Or (a=jeq, b=jlt, out=jle);
+
+
+    Mux8Way16 (a=false, b[15]=jgt, c[15]=jeq, d[15]=jge, e[15]=jlt, f[15]=jne, g[15]=jle, h=true, sel=instruction[0..2], out[15]=CJump, out=DEBUG);
+    And (a=instruction[15], b=CJump, out=ctrlJump);
 
     PC (in=regAtoPC, load=ctrlJump, inc=true, reset=reset, out[0..14]=pc);
 
