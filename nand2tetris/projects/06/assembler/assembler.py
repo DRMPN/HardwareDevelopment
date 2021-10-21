@@ -20,4 +20,4 @@ test_parser = Parser(data)
 test_parser.advance()
     
 
-print(test_parser.debug(), end='')
+test_parser.debug() #, end=''
