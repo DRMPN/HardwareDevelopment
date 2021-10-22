@@ -7,7 +7,7 @@ from parser import Parser
 
 # TODO: try - catch
 # open file
-file = open('test.txt', 'r')
+file = open('test/test.txt', 'r')
 # read it data
 data = file.readlines()
 # close file
