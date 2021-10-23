@@ -1,18 +1,11 @@
+from model.command_type import CommandType
 from re import sub
-from enum import Enum, auto
-
-# TODO: comment
-class CommandType(Enum):
-    A_COMMAND = auto()
-    C_COMMAND = auto()
-    L_COMMAND = auto()
 
 
+# PURPOSE: Parses the given input stream
 class Parser:
-    # PURPOSE: TODO: comment
-        # Opens the input file/steram and gets ready to parse it
-    # ASSUMES: data is not None
-    # TODO: maybe create a dictionary for current command?
+
+    # Initialize
     def __init__(self, data):
         
         self.data = self.preprocess(data)
@@ -61,18 +54,42 @@ class Parser:
     # RETURNS: CommandType
     def commandType(self):
         if self.current_command is not None:
-            if self.current_command[0] == "0":
+            if self.current_command[0] == "@":
                 return CommandType.A_COMMAND
-            elif self.current_command[0] == "1":
-                return CommandType.C_COMMAND
-            else:
+            elif self.current_command[0] == "(":
                 return CommandType.L_COMMAND
+            else:
+                return CommandType.C_COMMAND
 
 
-    # symbol
+    # TODO: rework later
+    # PURPOSE: Returns the symbol or decimal Xxx of the current command @Xxx or (Xxx)
+    # RETURNS: String
+    def symbol(self):
+        com_type = self.commandType()
+        if com_type == CommandType.A_COMMAND or com_type == CommandType.L_COMMAND:
+            return "TestSymbol"
 
-    # dest
 
-    # comp
+    # PURPOSE: Returns the dest mnemonic in the current C-command
+    # RETURNS: String
+    def dest(self):
+        if self.commandType() == CommandType.C_COMMAND:
+            return self.current_command.split('=')[0]
 
-    # jump
+
+    # PURPOSE: Returns the comp mnemonic in the current C-command
+    # RETURNS: String
+    def comp(self):
+        if self.commandType() == CommandType.C_COMMAND:
+            return str(self.current_command.split('=')[1].split(';')[0])
+
+
+    # PURPOSE: Retuns the jump mnemonic in the current C-command
+    # RETURNS: String
+    def jump(self):
+        if self.commandType() == CommandType.C_COMMAND:
+            try:
+                return self.current_command.split(';')[1]
+            except IndexError:
+                pass
