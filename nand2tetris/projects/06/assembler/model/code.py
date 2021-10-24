@@ -1,10 +1,11 @@
 
-# TODO: 
+
+# PURPOSE: Translates Hack assembly language mnemonics into binary codes.
 class Code:
 
     # PURPOSE: Returns the binary code of the dest mnemonic
     # RETURNS: String
-    def dest(self, m):
+    def dest(mnemonic: str) -> str:
         return {
             None:'000',
             'M':'001',
@@ -14,12 +15,12 @@ class Code:
             'AM':'101',
             'AD':'110',
             'AMD':'111'
-        }[m]
+        }[mnemonic]
 
     
     # PURPOSE: Returns the binary code of the comp mnemonic
     # RETURNS: String
-    def comp(self, m):
+    def comp(mnemonic: str) -> str:
         return {
             '0':'0101010',
             '1':'0111111',
@@ -49,12 +50,12 @@ class Code:
             'M-D':'1000111',
             'D&M':'1000000',
             'D|M':'1010101'
-        }[m]
+        }[mnemonic]
 
 
     # PURPOSE: Returns the binary code of the jump mnemonic
     # RETURNS: String
-    def jump(self, m):
+    def jump(mnemonic: str) -> str:
         return {
             None:'000',
             'JGT':'001',
@@ -64,4 +65,4 @@ class Code:
             'JNE':'101',
             'JLE':'110',
             'JMP':'111'
-        }[m]
+        }[mnemonic]
