@@ -113,16 +113,16 @@ class TestCodeMethods(unittest.TestCase):
     # PURPOSE: Tests dest funciton
     def test_dest(self):
         for i in range(len(self.test_dest_data)):
-            self.assertEqual(Code.dest(self, self.test_dest_data[i]), self.comp_dest_data[i])
+            self.assertEqual(Code.dest(self.test_dest_data[i]), self.comp_dest_data[i])
 
 
     # PURPOSE: Tests comp funciton
     def test_comp(self):
         for i in range(len(self.test_comp_data)):
-            self.assertEqual(Code.comp(self, self.test_comp_data[i]), self.comp_comp_data[i])
+            self.assertEqual(Code.comp(self.test_comp_data[i]), self.comp_comp_data[i])
     
 
     # PURPOSE: Tests comp funciton
     def test_jump(self):
         for i in range(len(self.test_jump_data)):
-            self.assertEqual(Code.jump(self, self.test_jump_data[i]), self.comp_jump_data[i])
+            self.assertEqual(Code.jump(self.test_jump_data[i]), self.comp_jump_data[i])
