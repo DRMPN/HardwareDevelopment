@@ -1,13 +1,13 @@
+import unittest
 from model.parser import Parser
 from model.command_type import CommandType
-import unittest
 
 
 # PURPOSE: Tests parser module
 class TestParserMethods(unittest.TestCase):
 
     # Initialize parser with given test data
-    data = ['@100 \t \n', 'D = M + 1; JGT // Comment line', '(LOOP) // Comment line', '// Comment line']
+    data = ['@100 \t \n', 'D = M + 1; JGT // Comment line', '(LOOP)', '// Comment line', 'A = A + 1\t\n']
     parser = Parser(data)
 
 
@@ -26,7 +26,7 @@ class TestParserMethods(unittest.TestCase):
 
     # PURPOSE: Tests preprocess_line function
     def test_parser_preprocess_line(self):
-        compare_data = ['@100', 'D=M+1;JGT', '(LOOP)', '']
+        compare_data = ['@100', 'D=M+1;JGT', '(LOOP)', '','A=A+1']
         for i in range(len(self.data)):
             test_line = self.data[i]
             compare_line = compare_data[i]
@@ -36,7 +36,7 @@ class TestParserMethods(unittest.TestCase):
     # PURPOSE: Tests preprocess function
     def test_preprocess(self):
         test_data = self.data
-        compare_data = ['@100', 'D=M+1;JGT', '(LOOP)']
+        compare_data = ['@100', 'D=M+1;JGT', '(LOOP)','A=A+1']
         self.assertEqual(self.parser.preprocess(test_data), compare_data)
 
 
@@ -77,11 +77,15 @@ class TestParserMethods(unittest.TestCase):
         self.parser.advance()
         self.assertEqual(self.parser.current_command, '(LOOP)')
         self.assertEqual(self.parser.current_command_number, 2)
+        
+        self.parser.advance()
+        self.assertEqual(self.parser.current_command, 'A=A+1')
+        self.assertEqual(self.parser.current_command_number, 3)
 
         # try to advance past current data
         self.parser.advance()
-        self.assertEqual(self.parser.current_command, '(LOOP)')
-        self.assertEqual(self.parser.current_command_number, 2)
+        self.assertEqual(self.parser.current_command, 'A=A+1')
+        self.assertEqual(self.parser.current_command_number, 3)
 
         # test on empty data
         p = Parser([])
@@ -110,7 +114,7 @@ class TestParserMethods(unittest.TestCase):
     def test_symbol(self):
         # A-command test
         self.parser.advance()
-        self.assertEqual(self.parser.symbol(), "TestSymbol")
+        self.assertEqual(self.parser.symbol(), "100")
         # C-command test
         self.parser.advance()
         self.assertIsNone(self.parser.symbol())
@@ -131,6 +135,9 @@ class TestParserMethods(unittest.TestCase):
         # L-command test
         self.parser.advance()
         self.assertIsNone(self.parser.jump())
+        # C-command test
+        self.parser.advance()
+        self.assertEqual(self.parser.dest(), 'A')
 
    
     # PURPOSE: Tests comp function
@@ -145,6 +152,9 @@ class TestParserMethods(unittest.TestCase):
         # L-command test
         self.parser.advance()
         self.assertIsNone(self.parser.jump())
+        # C-command test
+        self.parser.advance()
+        self.assertEqual(self.parser.comp(), 'A+1')
 
 
     # PURPOSE: Tests jump function
@@ -159,9 +169,8 @@ class TestParserMethods(unittest.TestCase):
         # L-command test
         self.parser.advance()
         self.assertIsNone(self.parser.jump())
-
-        # TODO: reforge tests
-        self.parser.current_command="D=M+1"
+        # C-command test
+        self.parser.advance()
         self.assertIsNone(self.parser.jump())
 
 

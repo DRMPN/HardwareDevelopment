@@ -1,5 +1,5 @@
-from model.command_type import CommandType
 from re import sub
+from model.command_type import CommandType
 
 
 # PURPOSE: Parses the given input stream
@@ -9,7 +9,7 @@ class Parser:
     def __init__(self, data):
         
         self.data = self.preprocess(data)
-        self.data_size = len(self.data) - 1
+        self.data_size = len(self.data)
         
         self.current_command = None
         self.current_command_number = -1
@@ -39,7 +39,7 @@ class Parser:
     # PURPOSE: Are there more commands in the input?
     # RETURNS: Boolean
     def hasMoreCommands(self):
-        return self.current_command_number < self.data_size
+        return self.current_command_number < self.data_size - 1
 
 
     # PURPOSE: Reads the next command from the input and makes it the current command
@@ -67,7 +67,9 @@ class Parser:
     # RETURNS: String
     def symbol(self):
         com_type = self.commandType()
-        if com_type == CommandType.A_COMMAND or com_type == CommandType.L_COMMAND:
+        if com_type == CommandType.A_COMMAND:
+            return self.current_command.split('@')[1]
+        if com_type == CommandType.L_COMMAND:
             return "TestSymbol"
 
 
