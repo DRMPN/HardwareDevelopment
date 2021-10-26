@@ -7,7 +7,7 @@ from model.command_type import CommandType
 class Parser:
 
     # Initialize
-    def __init__(self, data: List[str]):
+    def __init__(self, data: List[str]) -> None:
         
         self.data = self.preprocess(data)
         self.data_size = len(self.data)
