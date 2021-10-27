@@ -63,7 +63,6 @@ class Parser:
                 return CommandType.C_COMMAND
 
 
-    # TODO: rework later
     # PURPOSE: Returns the symbol or decimal Xxx of the current command @Xxx or (Xxx)
     # RETURNS: String
     def symbol(self) -> str:
@@ -71,21 +70,25 @@ class Parser:
         if com_type == CommandType.A_COMMAND:
             return self.current_command.split('@')[1]
         if com_type == CommandType.L_COMMAND:
-            return "TestSymbol"
+            return self.current_command[1:-1]
 
 
     # PURPOSE: Returns the dest mnemonic in the current C-command
     # RETURNS: String
     def dest(self) -> str:
         if self.commandType() == CommandType.C_COMMAND:
-            return self.current_command.split('=')[0]
+            if '=' in self.current_command:
+                return self.current_command.split('=')[0]
 
 
     # PURPOSE: Returns the comp mnemonic in the current C-command
     # RETURNS: String
     def comp(self) -> str:
         if self.commandType() == CommandType.C_COMMAND:
-            return str(self.current_command.split('=')[1].split(';')[0])
+            try: 
+                return str(self.current_command.split('=')[1].split(';')[0])
+            except IndexError:
+                return str(self.current_command.split('=')[0].split(';')[0])
 
 
     # PURPOSE: Retuns the jump mnemonic in the current C-command
