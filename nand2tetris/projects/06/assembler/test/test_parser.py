@@ -112,7 +112,6 @@ class TestParserMethods(unittest.TestCase):
         self.assertEqual(self.parser.commandType(), CommandType.L_COMMAND)
 
 
-    # TODO: rework later
     # PURPOSE: Tests symbol function
     # CHANGES: self
     def test_symbol(self):

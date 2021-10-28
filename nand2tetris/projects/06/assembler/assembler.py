@@ -7,13 +7,12 @@ from model.command_type import CommandType
 from model.symbol_table import SymbolTable
 
 
-# TODO: add decorators, or at least give it a try
+# NOTE: reforge if needed 
+# BUG FIXME HACK NOTE TODO 
 
-# TODO: reforge
 
-# TODO: add predefined symbols
-
-# TODO: comment
+# Assembler that translates programs written in Hack assembly language 
+#       into the binary code understood by the Hack hardware platform.
 def main() -> IO:
 
     # Ensures correct usage of the program
@@ -47,11 +46,12 @@ def main() -> IO:
         sys.exit("Output file " + sys.argv[1] + " cannot be created")
 
 
-    ### First pass
+    ''' First pass '''
     # Builds symbol table
     ROM = 0
     for i in range(parser.data_size):
         parser.advance()
+        # if current command is L command, add it to the entry
         if parser.commandType() == CommandType.L_COMMAND:
             symbol_table.addEntry(parser.symbol(), ROM)
         else:
@@ -63,15 +63,16 @@ def main() -> IO:
     parser.current_command_number = -1
     
 
-    ### Second pass
+    ''' Second pass '''
     # Parses input data and writes it to an output file
-    # TODO: checks for a command type two times
+    # NOTE: checks for a command type two times
     ram_var = 16
     for i in range(parser.data_size):
         parser.advance()
 
         # C command
         if parser.commandType() == CommandType.C_COMMAND:
+            # assemble C command
             output_file.write(assemble_C(parser))
         
         # A command
@@ -79,13 +80,13 @@ def main() -> IO:
             
             symbol = parser.symbol()
 
-            # TODO: WTF TRY TO REFACTROR THIS
+            # HACK: WTF TRY TO REFACTROR THIS
             # is number
             try:
                 int(symbol)
                 output_file.write(assemble_A(symbol))
                 
-            # is symbol and not a number 
+            # is symbol
             except ValueError:   
                 
                 # symbol is found
