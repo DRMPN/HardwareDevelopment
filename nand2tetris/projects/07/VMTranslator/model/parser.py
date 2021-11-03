@@ -1,10 +1,7 @@
 # parser module
 # parses each VM command into its lexical elements
-from re import sub
-from typing import List
-
-
-# TODO: implement commandType class
+from typing import List, Union
+from model.command_type import CommandType
 
 
 # PURPOSE:  Handles the parsing of a single .vm file
@@ -24,22 +21,28 @@ class Parser():
         self.current_command_number = -1
 
 
-    # PURPOSE:  Removes all white spaces and comments from a single line.
+    # PURPOSE:  Removes all comments from a single line.
     # RETURNS:  string
     def preprocess_line(self, line: str) -> str:
-        return sub("\s","", line).split('//')[0]
+        return line.split('//')[0].strip()
 
 
-    # PURPOSE:  Removes all white spaces and comments from a data.
+    # PURPOSE:  Removes comments from an input data.
     # RETURNS:  list of strings
     def preprocess_data(self, data: List[str]) -> List[str]:
-        pass
+        preprocessed_data = []
+        for line in data:
+            preprocessed_line = self.preprocess_line(line)
+            # exclude strings with a length of 0 
+            if preprocessed_line != '' :
+                preprocessed_data.append(preprocessed_line)
+        return preprocessed_data
 
 
     # PURPOSE:  Are there more commands in the input?
     # RETURNS:  boolean
     def hasMoreCommands(self) -> bool:
-        pass
+        return self.current_command_number < self.data_size - 1
 
 
     # PURPOSE:  Reads the next command from the input and makes it current command.
@@ -47,27 +50,64 @@ class Parser():
     #           is no current command.
     # CHANGES:  self
     def advance(self) -> None:
-        pass
+        if self.hasMoreCommands():
+            self.current_command_number += 1
+            self.current_command = self.data[self.current_command_number]
 
 
     # PURPOSE:  Returns a constant representing the type of the current command.
     #           C_ARITHMETIC is returned for all the arithmetic/logical commands.
     # RETURNS:  class_name (C_ARITHMETIC, C_PUSH, C_POP, C_LABEL, C_GOTO, C_IF, 
     #           C_FUNCTION, C_RETURN, C_CALL).
+    
+    # TODO: search for a better solution
+    
     def commandType(self) -> None:
-        pass
+        
+        command = self.current_command.split(' ')[0]
+        
+        if command in CommandType.C_ARITHMETIC.value:
+            return CommandType.C_ARITHMETIC
+        
+        elif command in CommandType.C_PUSH.value:
+            return CommandType.C_PUSH
+
+        elif command in CommandType.C_POP.value:
+            return CommandType.C_POP
+        
+        else:
+            return CommandType.C_RETURN
 
 
     # PURPOSE:  Returns the first argument of the current command. In the case of
     #           C_ARITHMETIC, the command itself (add, sub, etc.) is returned.
     #           Should not be called if the current command is C_RETURN.
-    # RETURNS:  String
-    def arg1(self) -> str:
-        pass
+    # RETURNS:  String or None
+
+    # TODO: test with other commands
+
+    def arg1(self) -> Union[str, None]:
+
+        current_command_type = self.commandType()
+        
+        if current_command_type != CommandType.C_RETURN:
+
+            if current_command_type == CommandType.C_ARITHMETIC:
+                return self.current_command.split(' ')[0]
+            
+            else:
+                return self.current_command.split(' ')[1]
 
 
     # PURPOSE:  Returns the second argument of the current command. Should be called
     #           only if the current command is C_PUSH, C_POP, C_FUNCTION, or C_CALL.
-    # RETURNS: String
-    def arg2(self) -> str:
-        pass
+    # RETURNS: String or None
+
+    # TODO: test with other commands
+
+    def arg2(self) -> Union[str, None]:
+        
+        current_command_type = self.commandType()
+
+        if current_command_type in [CommandType.C_PUSH, CommandType.C_POP, CommandType.C_FUNCTION, CommandType.C_CALL]:
+            return self.current_command.split(' ')[2]
