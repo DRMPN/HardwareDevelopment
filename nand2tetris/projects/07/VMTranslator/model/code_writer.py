@@ -5,8 +5,8 @@ from typing import IO
 
 
 # PURPOSE:  Generates assembly code from the parsed VM command
+# NOTE: Leaves comment for each command line that is being translated
 class CodeWriter():
-    # NOTE: Leaves comment for each command line that is being translated
 
     # PURPOSE:  Opens the input file/stream and gets ready to write into it.
     # constructor (file/stream)
@@ -35,7 +35,7 @@ class CodeWriter():
     # TODO: check out command argument
 
     def writeArithmetic(self, command: str) -> IO:
-        self.file.write(f'// {command}\n')
+        self.file.write(f'// arithmetic command\n')
         self.file.write(f'{command}\n')
     
 
@@ -46,7 +46,7 @@ class CodeWriter():
     # TODO: check out command argument
 
     def writePushPop(self, command, segment: str, index: int) -> IO:
-        self.file.write(f'// {command} {segment} {index} \n')
+        self.file.write(f'// push {segment} {index} \n')
         self.file.write(f'{command}\n')
 
 
