@@ -63,11 +63,9 @@ def main():
 
         # NOTE: placeholer
         if command_type == CommandType.C_ARITHMETIC:
-            c = translate_arithmetic(parser.arg1())
-            code_writer.writeArithmetic(c)
+            code_writer.writeArithmetic(parser.arg1())
         else:
-            c = translate_push(parser.arg1(), parser.arg2())
-            code_writer.writePushPop(c, parser.arg1(), parser.arg2())
+            code_writer.writePushPop(command_type.value, parser.arg1(), parser.arg2())
 
     
     # Closes code_writer
@@ -76,106 +74,6 @@ def main():
 
     # Program exits with no error code:
     sys.exit(0)
-
-
-# PURPOSE:  Translates nine arithmetic commands
-# RETURNS:  String
-def translate_arithmetic(command: str) -> str:
-    if command == 'add':
-        return translate_add()
-    if command == 'sub':
-        return translate_sub()
-    if command == 'neg':
-        return translate_neg()
-
-
-# PURPOSE:  Generates hack assembly code for add command
-# RETURNS:  String
-def translate_add() -> str:
-    ls = [ 
-        # go to sp
-        '@SP',
-        # take sp address and go to y
-        'A = M - 1',
-        # take y 
-        'D = M',
-        # go to x
-        'A = A - 1',
-        # calculate x + y then store to x
-        'M = D + M',
-        # move SP backward
-        '@SP',
-        'M = M - 1'
-    ]
-
-    s = '\n'.join(ls)
-
-    return s
-
-
-# PURPOSE:  Generates hack assembly code for add command
-# RETURNS:  String
-def translate_sub() -> str:
-    ls = [ 
-        # go to sp
-        '@SP',
-        # take sp address and go to y
-        'A = M - 1',
-        # take y 
-        'D = M',
-        # go to x
-        'A = A - 1',
-        # calculate x + y then store to x
-        'M = M - D',
-        # move SP backward
-        '@SP',
-        'M = M - 1'
-    ]
-
-    s = '\n'.join(ls)
-
-    return s
-
-
-# PURPOSE:  Generates hack assembly code for add command
-# RETURNS:  String
-def translate_neg() -> str:
-    ls = [ 
-        # go to sp
-        '@SP',
-        # take sp address and go to y
-        'A = M - 1',
-        # negate y 
-        'M = -M',
-    ]
-
-    s = '\n'.join(ls)
-
-    return s
-
-
-# PURPOSE:  NOTE: only works with push constant N
-# RETURNS:  string
-def translate_push(arg1, arg2) -> str:
-    ls = [
-        # go to constant
-        f'@{arg2}',
-        # take constant
-        'D = A',
-        # go to sp
-        '@SP',
-        # push constant
-        'A = M',
-        'M = D',
-        # go to sp
-        '@SP',
-        # increase sp
-        'M = M + 1'
-    ]
-
-    s = '\n'.join(ls)
-
-    return s
 
 
 if __name__ == "__main__":
