@@ -1,7 +1,13 @@
 # CodeWriter module
 # writes the assembly code that implements the parsed command
 import sys
+from random import randrange
 from typing import IO
+
+
+# TODO:
+#   0.  Find abstraction for Hack generator funcitons
+#   1.  Rewrite Hack generator functions using decorator
 
 
 # PURPOSE:  Generates assembly code from the parsed VM command
@@ -31,9 +37,6 @@ class CodeWriter():
     # PURPOSE:  Writes to the output file the assembly code that implements
     #           the given arithmetic command.
     # writeArithmetic (command(string))
-
-    # TODO: check out command argument
-
     def writeArithmetic(self, command: str) -> IO:
         self.file.write(f'// {command}\n')
         c = translate_arithmetic(command)
@@ -43,13 +46,10 @@ class CodeWriter():
     # PURPOSE:  Writes to the output file the assembly code that implements
     #           the given command, where command is either C_PUSH or C_POP.
     # writePushPop ( command( C_PUSH or C_POP, segment(string), index(int) ) )
-
-    # TODO: check out command argument
-
     def writePushPop(self, command, segment: str, index: int) -> IO:
         self.file.write(f'// {command} {segment} {index} \n')
         c = translate_push(segment, index)
-        self.file.write(f'{command}\n')
+        self.file.write(f'{c}\n')
 
 
     # PURPOSE: Closes the output file.
@@ -57,6 +57,7 @@ class CodeWriter():
     def close(self) -> None:
         self.file.close()
         print('Done.')
+
 
 # PURPOSE:  Translates nine arithmetic commands
 # RETURNS:  String
@@ -67,6 +68,14 @@ def translate_arithmetic(command: str) -> str:
         return translate_sub()
     if command == 'neg':
         return translate_neg()
+    if command in ['eq', 'gt','lt']:
+        return translate_jump(command)
+    if command == 'and':
+        return translate_and()
+    if command == 'or':
+        return translate_or()
+    if command == 'not':
+        return translate_not()
 
 
 # PURPOSE:  Generates hack assembly code for add command
@@ -93,7 +102,7 @@ def translate_add() -> str:
     return s
 
 
-# PURPOSE:  Generates hack assembly code for add command
+# PURPOSE:  Generates hack assembly code for sub command
 # RETURNS:  String
 def translate_sub() -> str:
     ls = [ 
@@ -117,7 +126,7 @@ def translate_sub() -> str:
     return s
 
 
-# PURPOSE:  Generates hack assembly code for add command
+# PURPOSE:  Generates hack assembly code for neg command
 # RETURNS:  String
 def translate_neg() -> str:
     ls = [ 
@@ -134,55 +143,107 @@ def translate_neg() -> str:
     return s
 
 
-# PURPOSE:  Generates hack assembly code for add command
+# PURPOSE:  Generates hack assembly code for eq|gt|lt command
 # RETURNS:  String
-def translate_eq() -> str:
+def translate_jump(jump) -> str:
+    jump = jump.upper()
+    n = randrange(100)
+    ls = [ 
+        # go to sp
+        '@SP',
+        # move SP to y
+        'M = M - 1',
+        'A = M',
+        # take value of  y 
+        'D = M',
+        # move SP to x
+        '@SP',
+        'M = M - 1',
+        'A = M',
+        # at x calculate x - y
+        'D = M - D',
+        # compose 'unique' label
+        f'@TRUE{jump}{n}',
+        # D is condition for jump
+        f'D; J{jump}',
+        # false route
+        '@SP',
+        'A = M',
+        'M = 0',
+        f'@END{jump}{n}',
+        '0; JMP',
+        # true route
+        f'(TRUE{jump}{n})',
+        '@SP',
+        'A = M',
+        'M = -1',
+        # end 
+        f'(END{jump}{n})',
+        # increase SP
+        '@SP',
+        'M = M + 1'
+    ]
+
+    s = '\n'.join(ls)
+
+    return s
+
+
+# PURPOSE:  Generates hack assembly code for and command
+# RETURNS:  String
+def translate_and():
+    
+    ls = [
+        # move SP to y
+        '@SP',
+        'M = M - 1',
+        'A = M',
+        # take y
+        'D = M',
+        # go to x
+        'A = A - 1',
+        # compute (x and y) then store it in x
+        'M = D & M',
+    ]
+    
+    s = '\n'.join(ls)
+    
+    return s
+
+
+# PURPOSE:  Generates hack assembly code for or command
+# RETURNS:  String
+def translate_or():
+        
+    ls = [
+        # move SP to y
+        '@SP',
+        'M = M - 1',
+        'A = M',
+        # take y
+        'D = M',
+        # go to x
+        'A = A - 1',
+        # compute (x and y) then store it in x
+        'M = D | M',
+    ]
+    
+    s = '\n'.join(ls)
+    
+    return s
+
+
+# PURPOSE:  Generates hack assembly code for not command
+# RETURNS:  String
+def translate_not():
     ls = [ 
         # go to sp
         '@SP',
         # take sp address and go to y
         'A = M - 1',
-        # negate y 
-        'M = -M',
+        # invert y 
+        'M = !M',
     ]
-    '''
-    @SP            // SP--
-          M=M-1
-
-           go to y and take it
-          @SP
-          A=M
-          D=M
-
-          @SP            // SP--
-          M=M-1
-
-           go to x and negate x - y
-          @SP
-          A=M
-          D=M-D          // D is condition for jump
-
-           
-          @TRUE
-          D;$condition
-           false route
-          @SP
-          A=M
-          M=$FalseValue
-           end
-          @END
-          0;JMP
-
-           true route
-          (TRUE)
-          @SP
-          A=M
-          M=$TrueValue
-
-          (END)
-          @SP            // SP++
-          M=M+1
-    '''
 
     s = '\n'.join(ls)
 
@@ -190,7 +251,7 @@ def translate_eq() -> str:
 
 
 # PURPOSE:  NOTE: only works with push constant N
-# RETURNS:  string
+# RETURNS:  String
 def translate_push(arg1, arg2) -> str:
     ls = [
         # go to constant

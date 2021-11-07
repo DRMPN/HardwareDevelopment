@@ -24,10 +24,6 @@ from model.command_type import CommandType
 # 2. Implement the push constant x command
 
 
-# TODO:
-# Rewrite functions using decorator
-
-
 def main():
 
     # Insures correct program usage
