@@ -48,7 +48,11 @@ class CodeWriter():
     # writePushPop ( command( C_PUSH or C_POP, segment(string), index(int) ) )
     def writePushPop(self, command, segment: str, index: int) -> IO:
         self.file.write(f'// {command} {segment} {index} \n')
-        c = translate_push(segment, index)
+        c = None
+        if command =='push':
+            c = translate_push(segment, index)
+        elif command == 'pop':
+            c = translate_pop(segment, index)
         self.file.write(f'{c}\n')
 
 
@@ -145,6 +149,9 @@ def translate_neg() -> str:
 
 # PURPOSE:  Generates hack assembly code for eq|gt|lt command
 # RETURNS:  String
+
+# TODO: scan for a better solution for random variables
+
 def translate_jump(jump) -> str:
     jump = jump.upper()
     n = randrange(100)
@@ -252,23 +259,134 @@ def translate_not():
 
 # PURPOSE:  NOTE: only works with push constant N
 # RETURNS:  String
+
+# BUG:  there might be a bug somewhere
+
 def translate_push(arg1, arg2) -> str:
-    ls = [
-        # go to constant
-        f'@{arg2}',
-        # take constant
-        'D = A',
-        # go to sp
-        '@SP',
-        # push constant
-        'A = M',
-        'M = D',
-        # go to sp
-        '@SP',
-        # increase sp
-        'M = M + 1'
-    ]
+    
+    if arg1 == 'constant':
+        ls = [
+            # go to constant
+            f'@{arg2}',
+            # take constant
+            'D = A',
+            # go to sp
+            '@SP',
+            # push constant
+            'A = M',
+            'M = D',
+            # go to sp
+            '@SP',
+            # increase sp
+            'M = M + 1'
+        ]
+    elif arg1 == 'temp':
+
+        try:
+            n = 5 + int(arg2)
+        except:
+            sys.exit(f'Translation error, cannot resolve {arg2} symbol.')
+
+        ls = [
+            # go to constant
+            f'@{n}',
+            # take constant
+            'D = M',
+            # go to sp
+            '@SP',
+            # push constant
+            'A = M',
+            'M = D',
+            # go to sp
+            '@SP',
+            # increase sp
+            'M = M + 1'
+        ]
+    else:
+
+        m_seg = {
+            'local':'LCL',
+            'argument':'ARG',
+            'this':'THIS',
+            'that':'THAT'
+        }
+        
+        ls = [
+            # save second argument
+            f'@{arg2}',
+            'D = A',
+            # go to labeled memory segment
+            f'@{m_seg[arg1]}',
+            # go to computed address of required memory segment
+            'A = M + D',
+            # take data
+            'D = M',
+            # go to SP and push data
+            '@SP',
+            'A = M',
+            'M = D',
+            # increase SP
+            '@SP',
+            'M = M + 1'
+        ]
 
     s = '\n'.join(ls)
 
+    return s
+
+
+# PURPOSE:  Generates hack assembly code for pop command 
+def translate_pop(arg1, arg2):
+
+    if arg1 == 'temp':
+        
+        n = 5 + int(arg2)
+
+        ls = [
+            # move SP backwards
+            '@SP',
+            'M = M - 1',
+            # go to data
+            'A = M',
+            # take data
+            'D = M',
+            # pop data to requred memory segment
+            f'@{n}',
+            'M = D'
+        ]
+
+    else:
+
+        m_seg = {
+                'local':'LCL',
+                'argument':'ARG',
+                'this':'THIS',
+                'that':'THAT'
+            }
+
+        ls = [
+            # get second argument
+            f'@{arg2}',
+            'D = A',
+            # go to labeled memory segment
+            f'@{m_seg[arg1]}',
+            # compute address of required memory segment
+            'D = D + M',
+            # save address of required memory segment
+            '@R13',
+            'M = D',
+            # move SP backwards
+            '@SP',
+            'M = M - 1',
+            # go to data
+            'A = M',
+            # take data
+            'D = M',
+            # pop data to requred memory segment
+            '@R13',
+            'A = M',
+            'M = D'
+        ]
+    
+    s = '\n'.join(ls)
     return s
