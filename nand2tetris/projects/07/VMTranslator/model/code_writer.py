@@ -7,6 +7,14 @@ from typing import IO
 
 # TODO:
 #   0.  Find abstraction for Hack generator funcitons
+
+#       Combine     add + sub
+#       Combine     and + or
+#       Combine     neg + not
+
+#       Combine     push    constant + temp + pointer + static
+#       Combine     pop     temp + pointer + static
+
 #   1.  Rewrite Hack generator functions using decorator
 
 
@@ -16,16 +24,17 @@ class CodeWriter():
 
     # PURPOSE:  Opens the input file/stream and gets ready to write into it.
     # constructor (file/stream)
-    def __init__(self, filename) -> IO:
+    def __init__(self, path_to_file) -> IO:
         
         self.file = None
+        self.filename = path_to_file.split('/')[-1]
         
         try:
-            self.file = open(f'{filename}.asm', 'w')
+            self.file = open(f'{path_to_file}.asm', 'w')
         except OSError:
-            sys.exit(f'ERROR: File {filename} cannot be opened/created.')
+            sys.exit(f'ERROR: File {path_to_file}.asm cannot be opened/created.')
             
-        self.setFileName(filename)
+        self.setFileName(path_to_file)
 
 
     # PURPOSE:  Informes the code writer that the translation of a new VM
@@ -50,9 +59,9 @@ class CodeWriter():
         self.file.write(f'// {command} {segment} {index} \n')
         c = None
         if command =='push':
-            c = translate_push(segment, index)
+            c = translate_push(segment, index, self.filename)
         elif command == 'pop':
-            c = translate_pop(segment, index)
+            c = translate_pop(segment, index, self.filename)
         self.file.write(f'{c}\n')
 
 
@@ -65,6 +74,9 @@ class CodeWriter():
 
 # PURPOSE:  Translates nine arithmetic commands
 # RETURNS:  String
+
+# TODO: rewrite
+
 def translate_arithmetic(command: str) -> str:
     if command == 'add':
         return translate_add()
@@ -152,7 +164,7 @@ def translate_neg() -> str:
 
 # TODO: scan for a better solution for random variables
 
-def translate_jump(jump) -> str:
+def translate_jump(jump: str) -> str:
     jump = jump.upper()
     n = randrange(100)
     ls = [ 
@@ -257,12 +269,12 @@ def translate_not():
     return s
 
 
-# PURPOSE:  NOTE: only works with push constant N
+# PURPOSE:  Generates hack assembly code for a generic push command 
 # RETURNS:  String
 
-# BUG:  there might be a bug somewhere
+# TODO: rewrite
 
-def translate_push(arg1, arg2) -> str:
+def translate_push(arg1: str, arg2: str, filename: str) -> str:
     
     if arg1 == 'constant':
         ls = [
@@ -302,6 +314,45 @@ def translate_push(arg1, arg2) -> str:
             # increase sp
             'M = M + 1'
         ]
+    elif arg1 == 'pointer':
+
+        addr = None
+
+        if arg2 == '0':
+            addr = 'THIS'
+        else:
+            addr = 'THAT'
+
+        ls = [
+            # go to labeled memory segment
+            f'@{addr}',
+            # take data
+            'D = M',
+            # go to SP and push data
+            '@SP',
+            'A = M',
+            'M = D',
+            # increase SP
+            '@SP',
+            'M = M + 1'
+        ]
+    
+    elif arg1 == 'static':
+
+        ls = [
+            # go to labeled memory segment
+            f'@{filename}.{arg2}',
+            # take data
+            'D = M',
+            # go to SP and push data
+            '@SP',
+            'A = M',
+            'M = D',
+            # increase SP
+            '@SP',
+            'M = M + 1'
+        ]
+
     else:
 
         m_seg = {
@@ -335,8 +386,12 @@ def translate_push(arg1, arg2) -> str:
     return s
 
 
-# PURPOSE:  Generates hack assembly code for pop command 
-def translate_pop(arg1, arg2):
+# PURPOSE:  Generates hack assembly code for a generic pop command 
+# RETURNS:  String
+
+# TODO: rewrite
+
+def translate_pop(arg1: str, arg2: str, filename: str):
 
     if arg1 == 'temp':
         
@@ -352,6 +407,43 @@ def translate_pop(arg1, arg2):
             'D = M',
             # pop data to requred memory segment
             f'@{n}',
+            'M = D'
+        ]
+
+    elif arg1 == 'pointer':
+
+        addr = None
+
+        if arg2 == '0':
+            addr = 'THIS'
+        else:
+            addr = 'THAT'
+
+        ls = [
+            # move SP backwards
+            '@SP',
+            'M = M - 1',
+            # go to data
+            'A = M',
+            # take data
+            'D = M',
+            # pop data to requred memory segment
+            f'@{addr}',
+            'M = D'
+        ]
+        
+    elif arg1 == 'static':
+
+        ls = [
+            # move SP backwards
+            '@SP',
+            'M = M - 1',
+            # go to data
+            'A = M',
+            # take data
+            'D = M',
+            # pop data to requred memory segment
+            f'@{filename}.{arg2}',
             'M = D'
         ]
 
