@@ -61,12 +61,11 @@ M = D
 M = M + 1
 // sub
 @SP
-A = M - 1
+M = M - 1
+A = M
 D = M
 A = A - 1
 M = M - D
-@SP
-M = M - 1
 // push static 8 
 @StaticTest.8
 D = M
@@ -77,9 +76,8 @@ M = D
 M = M + 1
 // add
 @SP
-A = M - 1
+M = M - 1
+A = M
 D = M
 A = A - 1
 M = D + M
-@SP
-M = M - 1

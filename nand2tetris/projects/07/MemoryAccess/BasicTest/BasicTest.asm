@@ -7,12 +7,6 @@ M = D
 @SP
 M = M + 1
 // pop local 0 
-@0
-D = A
-@LCL
-D = D + M
-@R13
-M = D
 @SP
 M = M - 1
 A = M
@@ -37,12 +31,6 @@ M = D
 @SP
 M = M + 1
 // pop argument 2 
-@2
-D = A
-@ARG
-D = D + M
-@R13
-M = D
 @SP
 M = M - 1
 A = M
@@ -51,12 +39,6 @@ D = M
 A = M
 M = D
 // pop argument 1 
-@1
-D = A
-@ARG
-D = D + M
-@R13
-M = D
 @SP
 M = M - 1
 A = M
@@ -73,12 +55,6 @@ M = D
 @SP
 M = M + 1
 // pop this 6 
-@6
-D = A
-@THIS
-D = D + M
-@R13
-M = D
 @SP
 M = M - 1
 A = M
@@ -103,12 +79,6 @@ M = D
 @SP
 M = M + 1
 // pop that 5 
-@5
-D = A
-@THAT
-D = D + M
-@R13
-M = D
 @SP
 M = M - 1
 A = M
@@ -117,12 +87,6 @@ D = M
 A = M
 M = D
 // pop that 2 
-@2
-D = A
-@THAT
-D = D + M
-@R13
-M = D
 @SP
 M = M - 1
 A = M

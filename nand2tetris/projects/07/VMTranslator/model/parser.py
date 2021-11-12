@@ -1,5 +1,3 @@
-# parser module
-# parses each VM command into its lexical elements
 from typing import List, Union
 from model.command_type import CommandType
 
