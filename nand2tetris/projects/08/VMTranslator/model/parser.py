@@ -55,35 +55,21 @@ class Parser():
 
     # PURPOSE:  Returns a constant representing the type of the current command.
     #           C_ARITHMETIC is returned for all the arithmetic/logical commands.
-    # RETURNS:  class_name (C_ARITHMETIC, C_PUSH, C_POP, C_LABEL, C_GOTO, C_IF, 
+    # RETURNS:  CommandType: (C_ARITHMETIC, C_PUSH, C_POP, C_LABEL, C_GOTO, C_IF, 
     #           C_FUNCTION, C_RETURN, C_CALL).
-    
-    # TODO: add commands
-    
-    def commandType(self) -> None:
+    def commandType(self) -> CommandType:
         
         command = self.current_command.split(' ')[0]
-        
-        if command in CommandType.C_ARITHMETIC.value:
-            return CommandType.C_ARITHMETIC
-        
-        elif command in CommandType.C_PUSH.value:
-            return CommandType.C_PUSH
 
-        elif command in CommandType.C_POP.value:
-            return CommandType.C_POP
-        
-        else:
-            return CommandType.C_RETURN
+        for _, m in CommandType.__members__.items():
+            if command in m.value:
+                return m
 
 
     # PURPOSE:  Returns the first argument of the current command. In the case of
     #           C_ARITHMETIC, the command itself (add, sub, etc.) is returned.
     #           Should not be called if the current command is C_RETURN.
     # RETURNS:  String or None
-
-    # TODO: test with other commands
-
     def arg1(self) -> Union[str, None]:
 
         current_command_type = self.commandType()
@@ -100,9 +86,6 @@ class Parser():
     # PURPOSE:  Returns the second argument of the current command. Should be called
     #           only if the current command is C_PUSH, C_POP, C_FUNCTION, or C_CALL.
     # RETURNS: String or None
-
-    # TODO: test with other commands
-
     def arg2(self) -> Union[str, None]:
         
         current_command_type = self.commandType()
