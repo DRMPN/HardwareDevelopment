@@ -12,23 +12,26 @@ class CodeWriter():
 
     # TODO: rewrite path to file, should be directory or file
 
-    def __init__(self, path_to_file: str) -> IO:
+    def __init__(self, filename: str) -> IO:
         
         self.file = None
-        self.filename = path_to_file.split('/')[-1]
+        self.filename = filename
         
         try:
-            self.file = open(f'{path_to_file}.asm', 'w')
+            self.file = open(f'{filename}.asm', 'w')
         except OSError:
-            exit(f'ERROR: File {path_to_file}.asm cannot be opened/created.')
+            exit(f'ERROR: File {filename}.asm cannot be opened/created.')
             
-        self.setFileName(path_to_file)
+        self.setFileName(filename)
 
 
     # PURPOSE:  Informes the code writer that the translation of a new VM
     #           file is started.
-    def setFileName(self, path_to_file: str) -> None:
-        print(f'Translation has been started.\n{path_to_file}.vm --> {path_to_file}.asm')
+
+    # TODO: rewrite
+
+    def setFileName(self, filename: str) -> None:
+        print(f'Translation has been started.\n{filename}.vm --> {filename}.asm')
 
 
     # PURPOSE:  Writes to the output file the assembly code that implements
@@ -65,6 +68,35 @@ class CodeWriter():
     def close(self) -> None:
         self.file.close()
         print('Done.')
+
+
+    # PURPOSE:  Writes assembly code that effects the VM initialization.
+    #           This code must be placed at the beginning of the output file.
+    # writeInit
+
+
+    # PURPOSE:  Writes assembly code that effects the label command
+    # writeLabel(label: str)
+
+
+    # PURPOSE:  Writes assembly code that effects the goto command.
+    # writeGoto(label: str)
+
+
+    # PURPOSE:  Writes assembly code that effects the if-goto command.
+    # writeIf(label: str)
+
+
+    # PURPOSE:  Writes assembly code that effects the call command.
+    # writeCall(functionName: str, numArgs: int)
+
+
+    # PURPOSE:  Writes assembly code that effects the return command.
+    # writeReturn()
+
+
+    # PURPOSE:  Writes assembly code that effects the funciton command.
+    # writeFunction(funcitonName: str, numLocals: int)
 
 
 # PURPOSE:  Translates nine arithmetic commands
@@ -308,32 +340,3 @@ def translate_pop(arg1: str, arg2: str, filename: str) -> List[str]:
         common_part.extend(bar)
 
     return common_part
-
-
-# PURPOSE:  Writes assembly code that effects the VM initialization.
-#           This code must be placed at the beginning of the output file.
-# writeInit
-
-
-# PURPOSE:  Writes assembly code that effects the label command
-# writeLabel(label: str)
-
-
-# PURPOSE:  Writes assembly code that effects the goto command.
-# writeGoto(label: str)
-
-
-# PURPOSE:  Writes assembly code that effects the if-goto command.
-# writeIf(label: str)
-
-
-# PURPOSE:  Writes assembly code that effects the call command.
-# writeCall(functionName: str, numArgs: int)
-
-
-# PURPOSE:  Writes assembly code that effects the return command.
-# writeReturn()
-
-
-# PURPOSE:  Writes assembly code that effects the funciton command.
-# writeFunction(funcitonName: str, numLocals: int)
