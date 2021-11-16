@@ -4,6 +4,7 @@
 
 import os
 import sys
+from typing import List
 from model.parser import Parser
 from model.code_writer import CodeWriter
 from model.command_type import CommandType
@@ -17,53 +18,49 @@ from model.command_type import CommandType
 #   constructs a CodeWritter to handle output file
 #   marches through the input file, parsing each line and generatic code 
 
-# TODO: decide what was passed as argument, a directory or a single file 
 
 def main():
 
     # Ensures correct program usage
     if len(sys.argv) != 2:
-        sys.exit("Usage: python3 VMTranslator.py directory/filename.vm")
+        sys.exit("USAGE: \t$ python3 VMTranslator.py directory\n\t$ python3 VMTranslator.py file.vm")
 
-    
-    # Opens given directory/file and reads it's data
 
+    # Initializes data
     data = []
 
-    if os.path.isdir(sys.argv[1]):
-        
-        found = None
 
-        for file in os.listdir(sys.argv[1]):
+    # Get absolute path to a passed argument file/folder
+    abs_path_to_arg = os.path.abspath(sys.argv[1])
+
+
+    # If passed argument is a folder, then for every .vm file inside read it's data
+    if os.path.isdir(abs_path_to_arg):
+        
+        found = False
+
+        for file in os.listdir(abs_path_to_arg):
             if file.endswith('.vm'):
-                
                 found = True
-                
-                '''    
-                    print(f'Inside: {sys.argv[1]}')
-                    print(f'\tFound: {file}')
-                '''
-                test = (os.path.join(sys.argv[1], file))
-                
-                foo(data, test)
+
+                path_to_file = os.path.join(abs_path_to_arg, file)
+
+                read_file(data, path_to_file)
 
         if not found:
-            sys.exit(f"ERROR: Passed directory '{sys.argv[1]}' contains not a single .vm file.")
-        
+            sys.exit(f"ERROR: Passed directory '{abs_path_to_arg}' contains not a single .vm file.")
+
+    # If passed argument is a file, just read it's data
     else:
-        foo(data, sys.argv[1])
+        read_file(data, abs_path_to_arg)
     
 
-    print(data)
-
-
-    # Creates and initializes parser object
-    #parser = Parser(data)
+    # Creates and initializes parser object with data
+    parser = Parser(data)
 
 
     # Creates and initializes CodeWriter object
-    # TODO: pass filename not a path to file print(os.path.splitext(sys.argv[1])[0].split('/')[-1])
-    #code_writer = CodeWriter(os.path.splitext(sys.argv[1])[0])
+    code_writer = CodeWriter(abs_path_to_arg)
 
 
     # Main loop:
@@ -91,21 +88,22 @@ def main():
 
     
     # Closes code_writer
-    #code_writer.close()
+    code_writer.close()
 
 
     # Program exits with no error code:
     sys.exit(0)
 
 
-# TODO: comment
-def foo(data, path_to_file):
+# PURPOSE:  Opens file by given path, reads it's data and concatenates it with passed data
+# RETURNS:  None  
+# CHANGES:  data
+def read_file(data: List[str], path_to_file: str) -> None:
         try:
             file = open(path_to_file, 'r')
             data += file.readlines()
             file.close()     
-        except OSError as io:
-            print(io)
+        except OSError:
             sys.exit(f"ERROR: File '{path_to_file}' cannot be found/opened.")
 
 

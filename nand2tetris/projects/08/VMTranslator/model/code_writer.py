@@ -1,3 +1,4 @@
+import os
 from sys import exit
 from time import time
 from typing import IO, List
@@ -9,29 +10,24 @@ from functools import wraps
 class CodeWriter():
 
     # PURPOSE:  Opens the input file/stream and gets ready to write into it.
-
-    # TODO: rewrite path to file, should be directory or file
-
-    def __init__(self, filename: str) -> IO:
+    def __init__(self, path_to_file: str) -> IO:
         
         self.file = None
-        self.filename = filename
+        # Resolves a filename for an output file
+        self.filename = os.path.basename(path_to_file).split('.')[0]
         
         try:
-            self.file = open(f'{filename}.asm', 'w')
+            self.file = open(f'{path_to_file}/{self.filename}.asm', 'w')
         except OSError:
-            exit(f'ERROR: File {filename}.asm cannot be opened/created.')
+            exit(f'ERROR: File {path_to_file}.asm cannot be opened/created.')
             
-        self.setFileName(filename)
+        self.setFileName(self.filename)
 
 
     # PURPOSE:  Informes the code writer that the translation of a new VM
     #           file is started.
-
-    # TODO: rewrite
-
     def setFileName(self, filename: str) -> None:
-        print(f'Translation has been started.\n{filename}.vm --> {filename}.asm')
+        print(f'Translation has been started.\nOutput file: {filename}.asm')
 
 
     # PURPOSE:  Writes to the output file the assembly code that implements
@@ -72,6 +68,7 @@ class CodeWriter():
 
     # PURPOSE:  Writes assembly code that effects the VM initialization.
     #           This code must be placed at the beginning of the output file.
+    # TODO: later
     # writeInit
 
 
