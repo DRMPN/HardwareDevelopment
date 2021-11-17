@@ -16,10 +16,13 @@ class CodeWriter():
         # Resolves a filename for an output file
         self.filename = os.path.basename(path_to_file).split('.')[0]
         
+        # Replaces path/to/file.vm to path/to/file.asm
+        path_to_file = path_to_file.replace('.vm', '.asm')
+        
         try:
-            self.file = open(f'{path_to_file}/{self.filename}.asm', 'w')
+            self.file = open(f'{path_to_file}', 'w')
         except OSError:
-            exit(f'ERROR: File {path_to_file}.asm cannot be opened/created.')
+            exit(f'ERROR: File {path_to_file} cannot be opened/created.')
             
         self.setFileName(self.filename)
 
@@ -68,20 +71,34 @@ class CodeWriter():
 
     # PURPOSE:  Writes assembly code that effects the VM initialization.
     #           This code must be placed at the beginning of the output file.
-    # TODO: later
+    # TODO: later 
     # writeInit
+    # SP = 256
+    # call sys.init 
 
 
     # PURPOSE:  Writes assembly code that effects the label command
-    # writeLabel(label: str)
+    def writeLabel(self, label: str) -> IO:
+        # leave comment in file
+        self.file.write(f'// label {label}\n')
+        # translate label
+        l = translate_label(label)
+        # write to the file
+        self.file.write(f'{l}\n')
 
 
     # PURPOSE:  Writes assembly code that effects the goto command.
-    # writeGoto(label: str)
+    def writeGoto(self, label: str) -> IO:
+        self.file.write(f'// goto {label}\n')
+        goto = translate_goto(label)
+        self.file.write(f'{goto}\n')
 
 
     # PURPOSE:  Writes assembly code that effects the if-goto command.
-    # writeIf(label: str)
+    def writeIf(self, label: str) -> IO:
+        self.file.write(f'// goto {label}\n')
+        if_goto = translate_if(label)
+        self.file.write(f'{if_goto}\n')
 
 
     # PURPOSE:  Writes assembly code that effects the call command.
@@ -124,7 +141,7 @@ def add_newline(func) -> str:
 
 
 # PURPOSE:  Generates Hack assembly code for 'and' 'sub' 'and' 'or' commands
-# RETURNS:  String
+# RETURNS:  List of strings
 @add_newline
 def translate_binary(command: str) -> List[str]:
     # Prepare two variables
@@ -153,7 +170,7 @@ def translate_binary(command: str) -> List[str]:
 
 
 # PURPOSE:  Generates Hack assembly code for 'neg' 'not' commands
-# RETURNS:  String
+# RETURNS:  List of strings
 @add_newline
 def translate_unary(command: str) -> List[str]:
     # Prepare single variable
@@ -176,7 +193,7 @@ def translate_unary(command: str) -> List[str]:
 
 
 # PURPOSE:  Generates hack assembly code for eq|gt|lt command
-# RETURNS:  String
+# RETURNS:  List of strings
 @add_newline
 def translate_jump(jump: str) -> List[str]:
     jump = jump.upper()
@@ -222,7 +239,7 @@ def translate_jump(jump: str) -> List[str]:
 
 
 # PURPOSE:  Generates hack assembly code for a generic push command 
-# RETURNS:  String
+# RETURNS:  List of strings
 @add_newline
 def translate_push(arg1: str, arg2: str, filename: str) -> List[str]:
 
@@ -281,7 +298,7 @@ def translate_push(arg1: str, arg2: str, filename: str) -> List[str]:
 
 
 # PURPOSE:  Generates hack assembly code for a generic pop command 
-# RETURNS:  String
+# RETURNS:  List of strings
 @add_newline
 def translate_pop(arg1: str, arg2: str, filename: str) -> List[str]:
     # common part of the code
@@ -304,7 +321,8 @@ def translate_pop(arg1: str, arg2: str, filename: str) -> List[str]:
     if foo is not None:
         
         # code that comes before common part
-        [   # get second argument
+        common_part[:0] = [   
+            # get second argument
             f'@{arg2}',
             'D = A',
             # go to labeled memory segment
@@ -314,7 +332,7 @@ def translate_pop(arg1: str, arg2: str, filename: str) -> List[str]:
             # save address of required memory segment
             '@R13',
             'M = D'
-        ].extend(common_part)
+        ]
 
         # code that comes after common part
         common_part.extend(
@@ -337,3 +355,43 @@ def translate_pop(arg1: str, arg2: str, filename: str) -> List[str]:
         common_part.extend(bar)
 
     return common_part
+
+
+# PURPOSE:  Generates hack assembly code for a label command
+# RETURNS:  List of strings
+@add_newline
+def translate_label(label: str) -> List[str]:
+    foo = [
+        f'({label})'
+    ]
+    return foo
+
+
+# PURPOSE:  Generates hack assembly code for a unconditional goto command
+# RETURNS:  List of strings
+@add_newline
+def translate_goto(label: str) -> List[str]:
+    foo = [
+        f'@{label}',
+        '0; JMP'
+    ]
+    return foo
+
+
+# PURPOSE:  Generates hack assembly code for a conditional goto command
+# RETURNS:  List of strings
+@add_newline
+def translate_if(label: str) -> List[str]:
+    foo = [
+        # move SP backward
+        '@SP',
+        'M = M - 1',
+        # go to data
+        'A = M',
+        # take data
+        'D = M',
+        # if D != 0, jump
+        f'@{label}',
+        'D; JNE'
+    ]
+    return foo

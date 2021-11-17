@@ -67,7 +67,7 @@ def main():
 
     # TODO: rewrite
 
-    """
+    
     for i in range(parser.data_size):
 
         parser.advance()
@@ -82,10 +82,15 @@ def main():
 
         if command_type == CommandType.C_ARITHMETIC:
             code_writer.writeArithmetic(parser.arg1())
-        else:
+        elif command_type in [CommandType.C_PUSH, CommandType.C_POP]:
             code_writer.writePushPop(command_type.value, parser.arg1(), parser.arg2())
-    """
-
+        elif command_type == CommandType.C_LABEL:
+            code_writer.writeLabel(parser.arg1())
+        elif command_type == CommandType.C_GOTO:
+            code_writer.writeGoto(parser.arg1())
+        elif command_type == CommandType.C_IF:
+            code_writer.writeIf(parser.arg1())
+    
     
     # Closes code_writer
     code_writer.close()
