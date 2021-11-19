@@ -119,7 +119,6 @@ class CodeWriter():
 
     # PURPOSE:  Writes assembly code that effects the return command.
     def writeReturn(self):
-        pass
         # leave comment
         self.file.write(f'// return\n')
 
@@ -410,6 +409,9 @@ def translate_goto(label: str) -> List[str]:
 
 # PURPOSE:  Generates hack assembly code for a conditional goto command
 # RETURNS:  List of strings
+
+# TODO: reforge
+
 @add_newline
 def translate_if(label: str) -> List[str]:
     foo = [
@@ -427,13 +429,77 @@ def translate_if(label: str) -> List[str]:
     return foo
 
 
-def translate_return():
-    pass
-    lol = [
-        # endframe
+# PURPOSE:  Generates hack assembly code for a return command
+# RETURNS:  List of strings
+@add_newline
+def translate_return() -> List[str]:
+    foo = [
+    # moves topmost value of the local stack to arg(0)
+        # move sp back
+        '@SP',
+        'M = M - 1',
+        # go to data
+        'A = M',
+        # take data
+        'D = M',
+        # go to data
+        '@ARG',
+        'A = M',
+        # change data
+        'M = D',
+    
+    # moves sp to arg + 1
+        '@ARG',
+        'D = M + 1',
+        '@SP',
+        'M = D',
+
+    # endframe
         '@LCL',
         'D = M',
         '@R13',
         'M = D',
-        # retAddr
+        
+    # restores that
+        '@R13',
+        'A = M - 1',
+        'D = M',
+        '@THAT',
+        'M = D',
+
+    # restores this
+        '@2',
+        'D = A',
+        '@R13',
+        'A = M - D',
+        'D = M',
+        '@THIS',
+        'M = D',
+
+    # restores arg
+        '@3',
+        'D = A',
+        '@R13',
+        'A = M - D',
+        'D = M',
+        '@ARG',
+        'M = D',
+
+    # restores lcl
+        '@4',
+        'D = A',
+        '@R13',
+        'A = M - D',
+        'D = M',
+        '@LCL',
+        'M = D',
+
+    # NOTE: simple function test didn't check this
+    # jumps to the return address
+        '@5',
+        'D = A',
+        '@R13',
+        'A = M - D',
+        '0; JMP'
     ]
+    return foo
