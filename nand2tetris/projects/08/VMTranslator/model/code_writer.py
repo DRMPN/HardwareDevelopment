@@ -48,7 +48,7 @@ class CodeWriter():
 
     # PURPOSE:  Writes to the output file the assembly code that implements
     #           the given command, where command is either C_PUSH or C_POP.
-    def writePushPop(self, command: str, segment: str, index: int) -> IO:
+    def writePushPop(self, command: str, segment: str, index: str) -> IO:
         # leave comment in file
         self.file.write(f'// {command} {segment} {index} \n')
 
@@ -81,23 +81,35 @@ class CodeWriter():
     def writeLabel(self, label: str) -> IO:
         # leave comment in file
         self.file.write(f'// label {label}\n')
+        
         # translate label
         l = translate_label(label)
+        
         # write to the file
         self.file.write(f'{l}\n')
 
 
     # PURPOSE:  Writes assembly code that effects the goto command.
     def writeGoto(self, label: str) -> IO:
+        # leave comment
         self.file.write(f'// goto {label}\n')
+
+        # translate
         goto = translate_goto(label)
+        
+        # write translation
         self.file.write(f'{goto}\n')
 
 
     # PURPOSE:  Writes assembly code that effects the if-goto command.
     def writeIf(self, label: str) -> IO:
+        # leave comment
         self.file.write(f'// goto {label}\n')
+
+        # translate
         if_goto = translate_if(label)
+
+        # write translation
         self.file.write(f'{if_goto}\n')
 
 
@@ -106,11 +118,29 @@ class CodeWriter():
 
 
     # PURPOSE:  Writes assembly code that effects the return command.
-    # writeReturn()
+    def writeReturn(self):
+        pass
+        # leave comment
+        self.file.write(f'// return\n')
+
+        # translate
+        ret = translate_return()
+
+        # write translation
+        self.file.write(f'{ret}\n')
 
 
     # PURPOSE:  Writes assembly code that effects the funciton command.
-    # writeFunction(funcitonName: str, numLocals: int)
+    def writeFunction(self, funcitonName: str, numLocals: str) -> IO:
+        # write comment
+        self.file.write(f'// function {funcitonName} {numLocals}\n')
+
+        # write function label
+        self.writeLabel(funcitonName)
+
+        # initialize all of numLocals to 0 
+        for _ in range(int(numLocals)):
+            self.writePushPop('push', 'constant', '0')
 
 
 # PURPOSE:  Translates nine arithmetic commands
@@ -395,3 +425,15 @@ def translate_if(label: str) -> List[str]:
         'D; JNE'
     ]
     return foo
+
+
+def translate_return():
+    pass
+    lol = [
+        # endframe
+        '@LCL',
+        'D = M',
+        '@R13',
+        'M = D',
+        # retAddr
+    ]

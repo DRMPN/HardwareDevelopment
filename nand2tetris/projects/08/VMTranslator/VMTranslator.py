@@ -74,6 +74,7 @@ def main():
 
         command_type = parser.commandType()
 
+        # TODO: reforge
         '''
         for _, m in CommandType.__members__.items():
             if command in m.value:
@@ -90,7 +91,12 @@ def main():
             code_writer.writeGoto(parser.arg1())
         elif command_type == CommandType.C_IF:
             code_writer.writeIf(parser.arg1())
-    
+        elif command_type == CommandType.C_FUNCTION:
+            code_writer.writeFunction(parser.arg1(), parser.arg2())
+        elif command_type == CommandType.C_CALL:
+            pass
+        else:
+            code_writer.writeReturn()
     
     # Closes code_writer
     code_writer.close()
