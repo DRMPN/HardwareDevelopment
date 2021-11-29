@@ -81,6 +81,8 @@ def main():
                 return m
         '''
 
+        code_writer.writeInit()
+
         if command_type == CommandType.C_ARITHMETIC:
             code_writer.writeArithmetic(parser.arg1())
         elif command_type in [CommandType.C_PUSH, CommandType.C_POP]:
@@ -94,7 +96,7 @@ def main():
         elif command_type == CommandType.C_FUNCTION:
             code_writer.writeFunction(parser.arg1(), parser.arg2())
         elif command_type == CommandType.C_CALL:
-            pass
+            code_writer.writeCall(parser.arg1(), parser.arg2())
         else:
             code_writer.writeReturn()
     

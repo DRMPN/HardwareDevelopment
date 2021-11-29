@@ -16,8 +16,12 @@ class CodeWriter():
         # Resolves a filename for an output file
         self.filename = os.path.basename(path_to_file).split('.')[0]
         
-        # Replaces path/to/file.vm to path/to/file.asm
-        path_to_file = path_to_file.replace('.vm', '.asm')
+        if os.path.isdir(path_to_file):
+            # Replaces path/to/directory to path/to/directory/directory.asm
+            path_to_file = path_to_file + '/' + self.filename + '.asm'
+        else:
+            # Replaces path/to/file.vm to path/to/file.asm
+            path_to_file = path_to_file.replace('.vm', '.asm')
         
         try:
             self.file = open(f'{path_to_file}', 'w')
@@ -71,10 +75,18 @@ class CodeWriter():
 
     # PURPOSE:  Writes assembly code that effects the VM initialization.
     #           This code must be placed at the beginning of the output file.
-    # TODO: later 
-    # writeInit
-    # SP = 256
-    # call sys.init 
+    def writeInit(self):
+        # leave comment in file
+        self.file.write(f'// initialization\n')
+
+        # translate 
+        init = translate_init()
+
+        # write translation
+        self.file.write(f'{init}\n')
+
+        # call sys.init
+        self.writeCall('Sys.init', '0')
 
 
     # PURPOSE:  Writes assembly code that effects the label command
@@ -114,7 +126,15 @@ class CodeWriter():
 
 
     # PURPOSE:  Writes assembly code that effects the call command.
-    # writeCall(functionName: str, numArgs: int)
+    def writeCall(self, functionName: str, numArgs: int):
+        # leave comment
+        self.file.write(f'// call {functionName} {numArgs}\n')
+
+        # translate
+        call = translate_call(functionName, numArgs)
+
+        # write translation
+        self.file.write(f'{call}\n')
 
 
     # PURPOSE:  Writes assembly code that effects the return command.
@@ -500,6 +520,86 @@ def translate_return() -> List[str]:
         'D = A',
         '@R13',
         'A = M - D',
+        'A = M',
         '0; JMP'
+    ]
+    return foo
+
+
+#TODO:
+@add_newline
+def translate_call(functionName, numArgs):
+    # create return address
+    returnAddress = "returnAddress" + str(hash(time()))
+    
+    # push return address
+    foo = [
+        f'@{returnAddress}',
+        'D = A',
+        '@SP',
+        'A = M',
+        'M = D',
+        '@SP',
+        'M = M + 1'
+    ]
+    
+    # remove decorator from a push command
+    orig_push = translate_push.__wrapped__
+    
+    # push LCL
+    foo += orig_push('local', '0', None)
+
+    # push ARG
+    foo += orig_push('argument', '0', None)
+
+    # push this
+    foo += orig_push('this', '0', None)
+
+    # push that
+    foo += orig_push('that', '0', None)
+
+    # reposition ARG
+    foo += [
+        '@SP',
+        'D = M',
+        '@5',
+        'D = D - A',
+        f'@{numArgs}',
+        'D = D - A',
+        # ARG = SP - 5 - numArgs
+        '@ARG',
+        'M = D'
+    ]
+
+    # repostition LCL
+    foo += [
+        '@SP',
+        'D = M',
+        '@LCL',
+        'M = D'
+    ]
+
+    # transfers control to the called function
+    foo += [
+        f'@{functionName}',
+        '0; JMP'
+    ]
+
+    # declares a label for the return-address
+    foo += [
+        f'({returnAddress})'
+    ]
+
+    return foo
+
+
+# TODO:
+@add_newline
+def translate_init():
+    foo = [
+        '@256',
+        'D = A',
+        '@SP',
+        'M = D'
     ]
     return foo
