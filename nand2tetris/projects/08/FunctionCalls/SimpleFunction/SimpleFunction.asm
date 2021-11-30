@@ -87,49 +87,52 @@ D = M
 A = A - 1
 M = M - D
 // return
-@SP
-M = M - 1
-A = M
-D = M
-@ARG
-A = M
-M = D
-@ARG
-D = M + 1
-@SP
-M = D
 @LCL
 D = M
-@R13
+@436343939900279715
 M = D
-@R13
+@5
+D = A
+@436343939900279715
+D = M - D
+@436354935016557475
+M = D
+@SP
+A = M - 1
+D = M
+@ARG
+A = M
+M = D
+@ARG
+D = M
+@SP
+M = D + 1
+@436343939900279715
 A = M - 1
 D = M
 @THAT
 M = D
 @2
 D = A
-@R13
+@436343939900279715
 A = M - D
 D = M
 @THIS
 M = D
 @3
 D = A
-@R13
+@436343939900279715
 A = M - D
 D = M
 @ARG
 M = D
 @4
 D = A
-@R13
+@436343939900279715
 A = M - D
 D = M
 @LCL
 M = D
-@5
-D = A
-@R13
-A = M - D
+@436354935016557475
+A = M
 0; JMP

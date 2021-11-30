@@ -81,7 +81,7 @@ def main():
                 return m
         '''
 
-        code_writer.writeInit()
+        #code_writer.writeInit()
 
         if command_type == CommandType.C_ARITHMETIC:
             code_writer.writeArithmetic(parser.arg1())

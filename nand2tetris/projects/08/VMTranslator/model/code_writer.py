@@ -451,75 +451,79 @@ def translate_if(label: str) -> List[str]:
 
 # PURPOSE:  Generates hack assembly code for a return command
 # RETURNS:  List of strings
+# NOTE: RETURN IS CORRECT
 @add_newline
 def translate_return() -> List[str]:
-    foo = [
-    # moves topmost value of the local stack to arg(0)
-        # move sp back
-        '@SP',
-        'M = M - 1',
-        # go to data
-        'A = M',
-        # take data
-        'D = M',
-        # go to data
-        '@ARG',
-        'A = M',
-        # change data
-        'M = D',
-    
-    # moves sp to arg + 1
-        '@ARG',
-        'D = M + 1',
-        '@SP',
-        'M = D',
 
-    # endframe
+    FRAME = str(hash(time()))
+    RET = str(hash(time()))
+
+    # frame = lcl
+    foo = [
         '@LCL',
         'D = M',
-        '@R13',
+        f'@{FRAME}',
         'M = D',
-        
-    # restores that
-        '@R13',
+    
+    # ret = * (frame - 5)
+        '@5',
+        'D = A',
+        f'@{FRAME}',
+        'D = M - D',
+        F'@{RET}',
+        'M = D',
+
+    # *arg = pop()
+        '@SP',
+        'A = M - 1',
+        'D = M',
+
+        '@ARG',
+        'A = M',
+        'M = D',
+
+    # sp = arg + 1
+        '@ARG',
+        'D = M',
+        '@SP',
+        'M = D + 1',
+
+    # that = *(frame - 1)
+        f'@{FRAME}',
         'A = M - 1',
         'D = M',
         '@THAT',
         'M = D',
 
-    # restores this
+    # this = *(frame - 2)
         '@2',
         'D = A',
-        '@R13',
+        f'@{FRAME}',
         'A = M - D',
         'D = M',
         '@THIS',
         'M = D',
 
-    # restores arg
+    # arg = *(frame - 3)
         '@3',
         'D = A',
-        '@R13',
+        f'@{FRAME}',
         'A = M - D',
         'D = M',
         '@ARG',
         'M = D',
 
-    # restores lcl
+    # lcl = *(frame - 4)
         '@4',
         'D = A',
-        '@R13',
+        f'@{FRAME}',
         'A = M - D',
         'D = M',
         '@LCL',
         'M = D',
 
-    # NOTE: simple function test didn't check this
-    # jumps to the return address
-        '@5',
-        'D = A',
-        '@R13',
-        'A = M - D',
+    # goto ret
+        f'@{RET}',
         'A = M',
         '0; JMP'
     ]
@@ -530,7 +534,7 @@ def translate_return() -> List[str]:
 @add_newline
 def translate_call(functionName, numArgs):
     # create return address
-    returnAddress = "returnAddress" + str(hash(time()))
+    returnAddress = str(hash(time()))
     
     # push return address
     foo = [
