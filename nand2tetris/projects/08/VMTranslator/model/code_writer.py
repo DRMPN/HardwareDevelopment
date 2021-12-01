@@ -5,6 +5,9 @@ from typing import IO, List
 from functools import wraps
 
 
+# BUG: somewhere before Sys.main() return
+
+
 # PURPOSE:  Generates assembly code from the parsed VM command
 # NOTE: Leaves comment for each command line that is being translated
 class CodeWriter():
@@ -532,7 +535,7 @@ def translate_return() -> List[str]:
 
 #TODO:
 @add_newline
-def translate_call(functionName, numArgs):
+def translate_call0(functionName, numArgs):
     # create return address
     returnAddress = str(hash(time()))
     
@@ -606,4 +609,88 @@ def translate_init():
         '@SP',
         'M = D'
     ]
+    return foo
+
+
+
+# TODO: TEST
+@add_newline
+def translate_call(functionName, numArgs):
+
+    returnAddress = str(hash(time()))
+
+    foo = [
+
+        # push returnAddress
+        f'@{returnAddress}',
+        'D = A',
+        '@SP',
+        'A = M',
+        'M = D',
+        '@SP',
+        'M = M + 1',
+
+        # push LCL
+        '@LCL',
+        'D = M',
+        '@SP',
+        'A = M',
+        'M = D',
+        '@SP',
+        'M = M + 1',
+
+        # push ARG
+        '@ARG',
+        'D = M',
+        '@SP',
+        'A = M',
+        'M = D',
+        '@SP',
+        'M = M + 1',
+
+        # push THIS
+        '@THIS',
+        'D = M',
+        '@SP',
+        'A = M',
+        'M = D',
+        '@SP',
+        'M = M + 1',
+
+        # push THAT
+        '@THAT',
+        'D = M',
+        '@SP',
+        'A = M',
+        'M = D',
+        '@SP',
+        'M = M + 1',
+
+        # ARG = SP - 5 - numArgs
+        #   implemented as SP - (numArgs + 5)
+        f'@{numArgs}',
+        'D = A',
+        '@5',
+        'D = D + A',
+        '@SP',
+        'D = M - D',
+        '@ARG',
+        'M = D',
+
+        # LCL = SP
+        '@SP',
+        'D = M',
+        '@LCL',
+        'M = D',
+
+        # goto functionName
+        f'@{functionName}',
+        #'A = M',
+        '0; JMP',
+
+        #(returnAddress)
+        f'({returnAddress})'
+
+    ]
+
     return foo
