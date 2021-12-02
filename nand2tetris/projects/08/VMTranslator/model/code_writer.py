@@ -456,7 +456,7 @@ def translate_if(label: str) -> List[str]:
 # RETURNS:  List of strings
 # NOTE: RETURN IS CORRECT
 @add_newline
-def translate_return() -> List[str]:
+def translate_return0() -> List[str]:
 
     FRAME = str(hash(time()))
     RET = str(hash(time()))
@@ -600,22 +600,9 @@ def translate_call0(functionName, numArgs):
     return foo
 
 
-# TODO:
-@add_newline
-def translate_init():
-    foo = [
-        '@256',
-        'D = A',
-        '@SP',
-        'M = D'
-    ]
-    return foo
-
-
-
 # TODO: TEST
 @add_newline
-def translate_call(functionName, numArgs):
+def translate_call1(functionName, numArgs):
 
     returnAddress = str(hash(time()))
 
@@ -685,7 +672,6 @@ def translate_call(functionName, numArgs):
 
         # goto functionName
         f'@{functionName}',
-        #'A = M',
         '0; JMP',
 
         #(returnAddress)
@@ -693,4 +679,154 @@ def translate_call(functionName, numArgs):
 
     ]
 
+    return foo
+
+# TODO:
+@add_newline
+def translate_init():
+    foo = [
+        '@256',
+        'D = A',
+        '@SP',
+        'M = D'
+    ]
+    return foo
+
+
+@add_newline
+def translate_return():
+    foo = [
+            '@LCL',
+            'D = M',
+            '@frame',
+            'M = D',
+            # FRAME = LCL
+            '@5',
+            'D = D - A',
+            'A = D',
+            'D = M',
+            '@return_address',
+            # RET = *(FRAME-5)
+            'M = D',
+            '@SP',
+            'M = M - 1',
+            'A = M',
+            'D = M',
+            '@ARG',
+            'A = M',
+            'M = D',
+            # *ARG = pop()
+            '@ARG',
+            'D = M + 1',
+            '@SP',
+            'M = D',
+            # SP = ARG+1
+            '@frame',
+            'D = M - 1',
+            'A = D',
+            'D = M',
+            '@THAT',
+            'M = D',
+            # THAT = *(FRAME-1)
+            '@2',
+            'D = A',
+            '@frame',
+            'D = M - D',
+            'A = D',
+            'D = M',
+            '@THIS',
+            'M = D',
+            # THIS = *(FRAME-2)
+            '@3',
+            'D = A',
+            '@frame',
+            'D = M - D',
+            'A = D',
+            'D = M',
+            '@ARG',
+            'M = D',
+            # ARG = *(FRAME-3)
+            '@4',
+            'D = A',
+            '@frame',
+            'D = M - D',
+            'A = D',
+            'D = M',
+            '@LCL',
+            'M = D',
+            # LCL = *(FRAME-4)
+            '@return_address',
+            'A = M',
+            # goto RET
+            '0;JMP '
+    ]
+    return foo
+
+
+@add_newline
+def translate_call(function_name, n_args):
+
+    line_number = str(hash(time()))
+
+    foo = [
+            # push return-address
+            f'@{function_name}$ret.{line_number}',
+            'D = A',
+            '@SP',
+            'A = M',
+            'M = D',
+            '@SP',
+            'M = M + 1',
+            # push LCL
+            '@LCL',
+            'D = M',
+            '@SP',
+            'A = M',
+            'M = D',
+            '@SP',
+            'M = M + 1',
+            # push ARG
+            '@ARG',
+            'D = M',
+            '@SP',
+            'A = M',
+            'M = D',
+            '@SP',
+            'M = M + 1',
+            # push THIS
+            '@THIS',
+            'D = M',
+            '@SP',
+            'A = M',
+            'M = D',
+            '@SP',
+            'M = M + 1',
+            # push THAT
+            '@THAT',
+            'D = M',
+            '@SP',
+            'A = M',
+            'M = D',
+            '@SP',
+            'M = M + 1',
+            # ARG = SP-n-5
+            '@SP',
+            'D = M',
+            f'@{n_args}',
+            'D = D - A',
+            '@5',
+            'D = D - A',
+            '@ARG',
+            'M = D',
+            # LCL = SP
+            '@SP',
+            'D = M',
+            '@LCL',
+            'M = D',
+            # goto f
+            f'@{function_name}',
+            '0;JMP',
+            # (return-address)
+            f'({function_name}$ret.{line_number})'
+    ]
     return foo
