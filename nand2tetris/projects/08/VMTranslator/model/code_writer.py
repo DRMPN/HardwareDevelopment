@@ -5,9 +5,6 @@ from typing import IO, List
 from functools import wraps
 
 
-# BUG: somewhere before Sys.main() return
-
-
 # PURPOSE:  Generates assembly code from the parsed VM command
 # NOTE: Leaves comment for each command line that is being translated
 class CodeWriter():
@@ -19,6 +16,8 @@ class CodeWriter():
         # Resolves a filename for an output file
         self.filename = os.path.basename(path_to_file).split('.')[0]
         
+        # TODO: initialize sp if given path if directory
+
         if os.path.isdir(path_to_file):
             # Replaces path/to/directory to path/to/directory/directory.asm
             path_to_file = path_to_file + '/' + self.filename + '.asm'
@@ -432,9 +431,6 @@ def translate_goto(label: str) -> List[str]:
 
 # PURPOSE:  Generates hack assembly code for a conditional goto command
 # RETURNS:  List of strings
-
-# TODO: reforge
-
 @add_newline
 def translate_if(label: str) -> List[str]:
     foo = [
@@ -454,45 +450,41 @@ def translate_if(label: str) -> List[str]:
 
 # PURPOSE:  Generates hack assembly code for a return command
 # RETURNS:  List of strings
-# NOTE: RETURN IS CORRECT
 @add_newline
-def translate_return0() -> List[str]:
-
-    FRAME = str(hash(time()))
-    RET = str(hash(time()))
+def translate_return() -> List[str]:
 
     # frame = lcl
     foo = [
         '@LCL',
         'D = M',
-        f'@{FRAME}',
+        '@FRAME',
         'M = D',
     
     # ret = * (frame - 5)
         '@5',
-        'D = A',
-        f'@{FRAME}',
-        'D = M - D',
-        F'@{RET}',
+        'D = D - A',
+        'A = D',
+        'D = M',
+        '@RET',
         'M = D',
 
     # *arg = pop()
         '@SP',
-        'A = M - 1',
+        'M = M - 1',
+        'A = M',
         'D = M',
-
         '@ARG',
         'A = M',
         'M = D',
 
     # sp = arg + 1
         '@ARG',
-        'D = M',
+        'D = M + 1',
         '@SP',
-        'M = D + 1',
+        'M = D',
 
     # that = *(frame - 1)
-        f'@{FRAME}',
+        '@FRAME',
         'A = M - 1',
         'D = M',
         '@THAT',
@@ -501,7 +493,7 @@ def translate_return0() -> List[str]:
     # this = *(frame - 2)
         '@2',
         'D = A',
-        f'@{FRAME}',
+        '@FRAME',
         'A = M - D',
         'D = M',
         '@THIS',
@@ -510,7 +502,7 @@ def translate_return0() -> List[str]:
     # arg = *(frame - 3)
         '@3',
         'D = A',
-        f'@{FRAME}',
+        '@FRAME',
         'A = M - D',
         'D = M',
         '@ARG',
@@ -519,140 +511,52 @@ def translate_return0() -> List[str]:
     # lcl = *(frame - 4)
         '@4',
         'D = A',
-        f'@{FRAME}',
+        '@FRAME',
         'A = M - D',
         'D = M',
         '@LCL',
         'M = D',
 
     # goto ret
-        f'@{RET}',
+        '@RET',
         'A = M',
         '0; JMP'
     ]
     return foo
 
 
-#TODO:
+# PURPOSE:  Generates hack assembly code for a call command
+# RETURNS:  List of strings
 @add_newline
-def translate_call0(functionName, numArgs):
-    # create return address
+def translate_call(functionName, numArgs):
+
     returnAddress = str(hash(time()))
+
+    def push(segment: str):
+        foo = [
+            f'@{segment}',
+            'D = M',
+            '@SP',
+            'A = M',
+            'M = D',
+            '@SP',
+            'M = M + 1'
+        ]
+        return foo
     
-    # push return address
-    foo = [
-        f'@{returnAddress}',
-        'D = A',
-        '@SP',
-        'A = M',
-        'M = D',
-        '@SP',
-        'M = M + 1'
-    ]
-    
-    # remove decorator from a push command
-    orig_push = translate_push.__wrapped__
-    
+    # push returnAddress
+    foo = translate_push.__wrapped__('constant', returnAddress, None)
+
     # push LCL
-    foo += orig_push('local', '0', None)
-
+    foo += push('LCL')
     # push ARG
-    foo += orig_push('argument', '0', None)
+    foo += push('ARG')
+    # push THIS
+    foo += push('THIS')
+    # push THAT
+    foo += push('THAT')
 
-    # push this
-    foo += orig_push('this', '0', None)
-
-    # push that
-    foo += orig_push('that', '0', None)
-
-    # reposition ARG
     foo += [
-        '@SP',
-        'D = M',
-        '@5',
-        'D = D - A',
-        f'@{numArgs}',
-        'D = D - A',
-        # ARG = SP - 5 - numArgs
-        '@ARG',
-        'M = D'
-    ]
-
-    # repostition LCL
-    foo += [
-        '@SP',
-        'D = M',
-        '@LCL',
-        'M = D'
-    ]
-
-    # transfers control to the called function
-    foo += [
-        f'@{functionName}',
-        '0; JMP'
-    ]
-
-    # declares a label for the return-address
-    foo += [
-        f'({returnAddress})'
-    ]
-
-    return foo
-
-
-# TODO: TEST
-@add_newline
-def translate_call1(functionName, numArgs):
-
-    returnAddress = str(hash(time()))
-
-    foo = [
-
-        # push returnAddress
-        f'@{returnAddress}',
-        'D = A',
-        '@SP',
-        'A = M',
-        'M = D',
-        '@SP',
-        'M = M + 1',
-
-        # push LCL
-        '@LCL',
-        'D = M',
-        '@SP',
-        'A = M',
-        'M = D',
-        '@SP',
-        'M = M + 1',
-
-        # push ARG
-        '@ARG',
-        'D = M',
-        '@SP',
-        'A = M',
-        'M = D',
-        '@SP',
-        'M = M + 1',
-
-        # push THIS
-        '@THIS',
-        'D = M',
-        '@SP',
-        'A = M',
-        'M = D',
-        '@SP',
-        'M = M + 1',
-
-        # push THAT
-        '@THAT',
-        'D = M',
-        '@SP',
-        'A = M',
-        'M = D',
-        '@SP',
-        'M = M + 1',
-
         # ARG = SP - 5 - numArgs
         #   implemented as SP - (numArgs + 5)
         f'@{numArgs}',
@@ -669,164 +573,28 @@ def translate_call1(functionName, numArgs):
         'D = M',
         '@LCL',
         'M = D',
-
-        # goto functionName
-        f'@{functionName}',
-        '0; JMP',
-
-        #(returnAddress)
-        f'({returnAddress})'
-
     ]
+
+    # goto funcitonName
+    foo += translate_goto.__wrapped__(functionName)
+    
+    # (returnAddress)
+    foo += translate_label.__wrapped__(returnAddress)
 
     return foo
 
-# TODO:
+
+# PURPOSE:  Generates hack assembly code for an init command
+# RETURNS:  List of strings
 @add_newline
 def translate_init():
+    
+    # initialize SP to 256
     foo = [
         '@256',
         'D = A',
         '@SP',
         'M = D'
     ]
-    return foo
 
-
-@add_newline
-def translate_return():
-    foo = [
-            '@LCL',
-            'D = M',
-            '@frame',
-            'M = D',
-            # FRAME = LCL
-            '@5',
-            'D = D - A',
-            'A = D',
-            'D = M',
-            '@return_address',
-            # RET = *(FRAME-5)
-            'M = D',
-            '@SP',
-            'M = M - 1',
-            'A = M',
-            'D = M',
-            '@ARG',
-            'A = M',
-            'M = D',
-            # *ARG = pop()
-            '@ARG',
-            'D = M + 1',
-            '@SP',
-            'M = D',
-            # SP = ARG+1
-            '@frame',
-            'D = M - 1',
-            'A = D',
-            'D = M',
-            '@THAT',
-            'M = D',
-            # THAT = *(FRAME-1)
-            '@2',
-            'D = A',
-            '@frame',
-            'D = M - D',
-            'A = D',
-            'D = M',
-            '@THIS',
-            'M = D',
-            # THIS = *(FRAME-2)
-            '@3',
-            'D = A',
-            '@frame',
-            'D = M - D',
-            'A = D',
-            'D = M',
-            '@ARG',
-            'M = D',
-            # ARG = *(FRAME-3)
-            '@4',
-            'D = A',
-            '@frame',
-            'D = M - D',
-            'A = D',
-            'D = M',
-            '@LCL',
-            'M = D',
-            # LCL = *(FRAME-4)
-            '@return_address',
-            'A = M',
-            # goto RET
-            '0;JMP '
-    ]
-    return foo
-
-
-@add_newline
-def translate_call(function_name, n_args):
-
-    line_number = str(hash(time()))
-
-    foo = [
-            # push return-address
-            f'@{function_name}$ret.{line_number}',
-            'D = A',
-            '@SP',
-            'A = M',
-            'M = D',
-            '@SP',
-            'M = M + 1',
-            # push LCL
-            '@LCL',
-            'D = M',
-            '@SP',
-            'A = M',
-            'M = D',
-            '@SP',
-            'M = M + 1',
-            # push ARG
-            '@ARG',
-            'D = M',
-            '@SP',
-            'A = M',
-            'M = D',
-            '@SP',
-            'M = M + 1',
-            # push THIS
-            '@THIS',
-            'D = M',
-            '@SP',
-            'A = M',
-            'M = D',
-            '@SP',
-            'M = M + 1',
-            # push THAT
-            '@THAT',
-            'D = M',
-            '@SP',
-            'A = M',
-            'M = D',
-            '@SP',
-            'M = M + 1',
-            # ARG = SP-n-5
-            '@SP',
-            'D = M',
-            f'@{n_args}',
-            'D = D - A',
-            '@5',
-            'D = D - A',
-            '@ARG',
-            'M = D',
-            # LCL = SP
-            '@SP',
-            'D = M',
-            '@LCL',
-            'M = D',
-            # goto f
-            f'@{function_name}',
-            '0;JMP',
-            # (return-address)
-            f'({function_name}$ret.{line_number})'
-    ]
     return foo
