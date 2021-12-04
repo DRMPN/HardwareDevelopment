@@ -15,12 +15,13 @@ class CodeWriter():
         self.file = None
         # Resolves a filename for an output file
         self.filename = os.path.basename(path_to_file).split('.')[0]
-        
-        # TODO: initialize sp if given path if directory
+
+        is_dir = False
 
         if os.path.isdir(path_to_file):
             # Replaces path/to/directory to path/to/directory/directory.asm
             path_to_file = path_to_file + '/' + self.filename + '.asm'
+            is_dir = True
         else:
             # Replaces path/to/file.vm to path/to/file.asm
             path_to_file = path_to_file.replace('.vm', '.asm')
@@ -29,6 +30,9 @@ class CodeWriter():
             self.file = open(f'{path_to_file}', 'w')
         except OSError:
             exit(f'ERROR: File {path_to_file} cannot be opened/created.')
+
+        if is_dir:
+            self.writeInit()
             
         self.setFileName(self.filename)
 
@@ -128,7 +132,7 @@ class CodeWriter():
 
 
     # PURPOSE:  Writes assembly code that effects the call command.
-    def writeCall(self, functionName: str, numArgs: int):
+    def writeCall(self, functionName: str, numArgs: str):
         # leave comment
         self.file.write(f'// call {functionName} {numArgs}\n')
 
@@ -249,6 +253,7 @@ def translate_unary(command: str) -> List[str]:
 def translate_jump(jump: str) -> List[str]:
     jump = jump.upper()
     # generate random variable based on hash of time
+    # NOTE: possible reforge: leave only hash of time
     name = jump + str(hash(time()))
     los = [ 
         # go to sp
@@ -302,17 +307,17 @@ def translate_push(arg1: str, arg2: str, filename: str) -> List[str]:
     }.get(arg1)
 
     if bar is not None:
-        # code that comes before common part
 
+        # code that comes before common part
         first_part = [
-        # take value
-        f'@{arg2}',
-        'D = A',
-        # go to data
-        f'@{bar}',
-        'A = M + D',
-        # take data
-        'D = M'
+            # take value
+            f'@{arg2}',
+            'D = A',
+            # go to data
+            f'@{bar}',
+            'A = M + D',
+            # take data
+            'D = M'
         ]
 
     else:
@@ -453,25 +458,36 @@ def translate_if(label: str) -> List[str]:
 @add_newline
 def translate_return() -> List[str]:
 
-    # frame = lcl
+    # repetitive code for restoring N'th segment
+    def restore(segment: str, i: str):
+        bar = [
+            f'@{i}',
+            'D = A',
+            '@FRAME',
+            'A = M - D',
+            'D = M',
+            f'@{segment}',
+            'M = D'
+        ]
+        return bar
+
     foo = [
+    # frame = lcl
         '@LCL',
         'D = M',
         '@FRAME',
         'M = D',
     
-    # ret = * (frame - 5)
+    # ret = *(frame - 5)
         '@5',
-        'D = D - A',
-        'A = D',
+        'A = D - A',
         'D = M',
         '@RET',
         'M = D',
 
     # *arg = pop()
         '@SP',
-        'M = M - 1',
-        'A = M',
+        'A = M - 1',
         'D = M',
         '@ARG',
         'A = M',
@@ -482,46 +498,27 @@ def translate_return() -> List[str]:
         'D = M + 1',
         '@SP',
         'M = D',
+    ]
 
     # that = *(frame - 1)
-        '@FRAME',
-        'A = M - 1',
-        'D = M',
-        '@THAT',
-        'M = D',
+    foo += restore('THAT', '1')
 
     # this = *(frame - 2)
-        '@2',
-        'D = A',
-        '@FRAME',
-        'A = M - D',
-        'D = M',
-        '@THIS',
-        'M = D',
+    foo += restore('THIS', '2')
 
     # arg = *(frame - 3)
-        '@3',
-        'D = A',
-        '@FRAME',
-        'A = M - D',
-        'D = M',
-        '@ARG',
-        'M = D',
+    foo += restore('ARG', '3')
 
     # lcl = *(frame - 4)
-        '@4',
-        'D = A',
-        '@FRAME',
-        'A = M - D',
-        'D = M',
-        '@LCL',
-        'M = D',
+    foo += restore('LCL', '4')
 
     # goto ret
+    foo += [
         '@RET',
         'A = M',
         '0; JMP'
     ]
+
     return foo
 
 
@@ -531,34 +528,25 @@ def translate_return() -> List[str]:
 def translate_call(functionName, numArgs):
 
     returnAddress = str(hash(time()))
-
-    def push(segment: str):
-        foo = [
-            f'@{segment}',
-            'D = M',
-            '@SP',
-            'A = M',
-            'M = D',
-            '@SP',
-            'M = M + 1'
-        ]
-        return foo
     
     # push returnAddress
     foo = translate_push.__wrapped__('constant', returnAddress, None)
 
     # push LCL
-    foo += push('LCL')
+    foo += translate_push.__wrapped__('temp', '-4', None)
+
     # push ARG
-    foo += push('ARG')
+    foo += translate_push.__wrapped__('temp', '-3', None)
+
     # push THIS
-    foo += push('THIS')
+    foo += translate_push.__wrapped__('pointer', '0', None)
+
     # push THAT
-    foo += push('THAT')
+    foo += translate_push.__wrapped__('pointer', '1', None)
 
     foo += [
         # ARG = SP - 5 - numArgs
-        #   implemented as SP - (numArgs + 5)
+        # implemented as SP - (numArgs + 5)
         f'@{numArgs}',
         'D = A',
         '@5',
@@ -572,7 +560,7 @@ def translate_call(functionName, numArgs):
         '@SP',
         'D = M',
         '@LCL',
-        'M = D',
+        'M = D'
     ]
 
     # goto funcitonName
@@ -588,7 +576,7 @@ def translate_call(functionName, numArgs):
 # RETURNS:  List of strings
 @add_newline
 def translate_init():
-    
+
     # initialize SP to 256
     foo = [
         '@256',
