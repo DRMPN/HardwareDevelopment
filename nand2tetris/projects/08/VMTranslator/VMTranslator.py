@@ -64,24 +64,19 @@ def main():
 
 
     # Main loop:
-
-    # TODO: rewrite
-
-    
     for i in range(parser.data_size):
 
         parser.advance()
 
         command_type = parser.commandType()
 
-        # TODO: reforge
+        # TODO: possibility for reforge:
+        #       but is this good though?
         '''
         for _, m in CommandType.__members__.items():
             if command in m.value:
                 return m
         '''
-
-        #code_writer.writeInit()
 
         if command_type == CommandType.C_ARITHMETIC:
             code_writer.writeArithmetic(parser.arg1())

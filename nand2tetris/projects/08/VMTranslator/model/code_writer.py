@@ -171,7 +171,8 @@ class CodeWriter():
 # PURPOSE:  Translates nine arithmetic commands
 # RETURNS:  String
 
-# TODO: maybe refactor it? huh O_o? but now it's more readable
+# NOTE: maybe refactor it? huh O_o? but now it's more readable
+#       unite all translation into one function?
 
 def translate_arithmetic(command: str) -> str:
 
@@ -252,6 +253,7 @@ def translate_unary(command: str) -> List[str]:
 @add_newline
 def translate_jump(jump: str) -> List[str]:
     jump = jump.upper()
+    
     # generate random variable based on hash of time
     # NOTE: possible reforge: leave only hash of time
     name = jump + str(hash(time()))
