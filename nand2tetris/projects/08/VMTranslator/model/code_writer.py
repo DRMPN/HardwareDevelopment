@@ -18,6 +18,8 @@ class CodeWriter():
 
         is_dir = False
 
+        # NOTE: Review this for a bugfix 
+
         if os.path.isdir(path_to_file):
             # Replaces path/to/directory to path/to/directory/directory.asm
             path_to_file = path_to_file + '/' + self.filename + '.asm'
@@ -327,6 +329,11 @@ def translate_push(arg1: str, arg2: str, filename: str) -> List[str]:
         pointer = {'0':'THIS', '1':'THAT'}.get(arg2)
 
         # code that comes before common part
+
+        # BUG:  consider reading page 164 of the book
+        #       figure 8.6 static variables are handled incorrectly
+        #       the problem is within VMTranslator.py
+
         first_part = {
             'temp': [
                 # go to data

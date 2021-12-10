@@ -35,6 +35,12 @@ def main():
 
 
     # If passed argument is a folder, then for every .vm file inside read it's data
+
+    # BUG:  each name of .vm file is lost during this operation, consider rewriting it!
+    #       possible solution: parse and translate each file individually
+    #       either open file for write on first iteration and for the rest - append
+    #       or after a complete translation write entire data into a file 
+
     if os.path.isdir(abs_path_to_arg):
         
         found = False
