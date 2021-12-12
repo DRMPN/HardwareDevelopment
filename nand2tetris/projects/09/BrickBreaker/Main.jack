@@ -1,0 +1,14 @@
+
+
+//
+class Main {
+    
+    //
+    function void main() {
+        var BrickBreakerGame game;
+        let game = BrickBreakerGame.new();
+        do game.run();
+        do game.dispose();
+        return;
+    }
+}

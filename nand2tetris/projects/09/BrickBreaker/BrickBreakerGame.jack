@@ -1,0 +1,60 @@
+
+
+//
+class BrickBreakerGame {
+
+
+    //
+    field Platform platform;
+
+
+    // Constructs a new Brick Breaker game
+    constructor BrickBreakerGame new() {
+        let platform = Platform.new(256, 128);
+        return this;
+    }
+
+
+    // Frees memory from a game
+    method void dispose() {
+        do platform.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+
+    //
+    method void run() {
+        
+        var char key;
+        var bool exit;
+
+        let exit = false;
+
+        while (~exit) {
+
+            //while (key = 0) {
+            //    let key = Keyboard.keyPressed();
+            //    do platform.draw();
+            //}
+            let key = Keyboard.keyPressed();
+
+            do platform.draw();
+
+            do Sys.wait(10);
+
+            if (key = 81)   { let exit = true; }          // q
+            if (key = 130)  { do platform.moveLeft(); }    // left arrow
+            if (key = 132)  { do platform.moveRight(); }   // right arrow
+
+
+            //while (~(key = 0)) {
+            //    let key = Keyboard.keyPressed();
+            //    do platform.draw();
+            //}
+        }
+
+        return;
+    }
+
+} // class
