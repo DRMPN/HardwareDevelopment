@@ -11,6 +11,7 @@ class Platform {
     // 
     static int X_SIZE;
     static int Y_SIZE;
+    static int SPEED;
 
 
     // Constructs a new platform within a given coordinates
@@ -21,10 +22,20 @@ class Platform {
 
         let X_SIZE = 30;
         let Y_SIZE = 5;
+        let SPEED = 4;
         
         do draw();
         
         return this;
+    }
+
+    
+    // Getters
+    method int getX() {
+        return x;
+    }
+    method int getY() {
+        return y;
     }
 
     
@@ -55,7 +66,7 @@ class Platform {
     method void moveLeft() {
         if (x > 1) {
             do erase();
-            let x = x - 2;
+            let x = x - SPEED;
             do draw();
         }
         return;
@@ -66,7 +77,7 @@ class Platform {
     method void moveRight() {
         if (x + X_SIZE < 510) {
             do erase();
-            let x = x + 2;
+            let x = x + SPEED;
             do draw();
         }
         return;

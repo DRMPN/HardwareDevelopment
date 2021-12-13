@@ -6,24 +6,40 @@ class BrickBreakerGame {
 
     //
     field Platform platform;
+    field Ball ball;
 
 
     // Constructs a new Brick Breaker game
     constructor BrickBreakerGame new() {
-        let platform = Platform.new(256, 128);
+
+        let platform = Platform.new(256, 220);
+        let ball = Ball.new(256, 128);
+
         return this;
     }
 
 
     // Frees memory from a game
     method void dispose() {
+
         do platform.dispose();
+        do ball.dispose();
+
         do Memory.deAlloc(this);
+
         return;
     }
 
 
-    //
+    // checks platform and ball possible bounce
+    // TODO: add better platform collision
+    method bool isBounce() {
+        return (((platform.getX() < ball.getX()) & ( platform.getY() < ball.getY())) &
+                ((ball.getX() < (platform.getX() + 30)) & ( platform.getY() < ball.getY())));
+    }
+
+
+    // runs the game
     method void run() {
         
         var char key;
@@ -33,25 +49,22 @@ class BrickBreakerGame {
 
         while (~exit) {
 
-            //while (key = 0) {
-            //    let key = Keyboard.keyPressed();
-            //    do platform.draw();
-            //}
+
             let key = Keyboard.keyPressed();
 
+            if (isBounce()) { do ball.bounce(); }
+
             do platform.draw();
+            
+            do ball.move();
 
-            do Sys.wait(10);
+            //do Sys.wait(5);
 
-            if (key = 81)   { let exit = true; }          // q
+            if (key = 81)   { let exit = true; }           // q
             if (key = 130)  { do platform.moveLeft(); }    // left arrow
             if (key = 132)  { do platform.moveRight(); }   // right arrow
 
 
-            //while (~(key = 0)) {
-            //    let key = Keyboard.keyPressed();
-            //    do platform.draw();
-            //}
         }
 
         return;

@@ -3,4 +3,101 @@
 //
 class Ball {
 
+    
+    // coordinates
+    field int x, y;
+    
+    // speed of the ball
+    field int dx, dy;
+
+    // radius
+    static int RADIUS;
+    
+    // TODO 
+    // static int SPEED;
+
+
+    //
+    constructor Ball new(int Ax, int Ay) {
+
+        let x = Ax;
+        let y = Ay;
+
+        let dx = 2;
+        let dy = 2;
+
+        let RADIUS = 3;
+
+        do draw();
+
+        return this;
+    }
+
+
+    // Getters
+    method int getX() {
+        return x;
+    }
+    method int getY() {
+        return y;
+    }
+
+
+    //
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+
+    //
+    method void draw() {
+        do Screen.setColor(true);
+        do Screen.drawCircle(x, y, RADIUS);
+        return;
+    }
+
+
+    //
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawCircle(x, y, RADIUS);
+        return;
+    }
+
+
+    // 
+    method void checkBorders() {
+        if (x + RADIUS > 510) { let dx = -2; }
+        if (x + RADIUS < 8) { let dx = 2; }
+
+        if (y + RADIUS > 250) { let dy = -2; }
+        if (y + RADIUS < 8) { let dy = 2; }
+        return;
+    }
+
+
+    // 
+    method void bounce() {
+        if ( dy > dx ) { let dy = -2; }
+        if ( (dx > 0) & (dx = dy) ) { let dy = -2;}
+        return;
+    }
+
+
+    //
+    method void move() {
+        
+        do erase();
+
+        do checkBorders();
+
+        let x = x + dx;
+        let y = y + dy;
+
+        do draw();
+
+        return;
+    }
+
 }
