@@ -1,32 +1,38 @@
 
 
-//
+// PURPOSE: represents a moving ball
 class Ball {
 
-    
-    // coordinates
+    // Coordinates of a ball
     field int x, y;
+
+    // Speed of a ball
+    static int SPEED;
     
-    // speed of the ball
+    // Direction of ball movement
+    // TODO: maybe enumeration like with directions
     field int dx, dy;
 
-    // radius
+    // Radius of a ball
     static int RADIUS;
-    
-    // TODO 
-    // static int SPEED;
+
+    // TODO
+    // static int LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER
 
 
-    //
+    // PURPOSE: creates a new ball object with given coordinates
+    // CHANGES: memory
     constructor Ball new(int Ax, int Ay) {
 
         let x = Ax;
         let y = Ay;
 
-        let dx = 2;
-        let dy = 2;
+        let SPEED = 4;
 
         let RADIUS = 3;
+        
+        let dx = SPEED;
+        let dy = SPEED;
 
         do draw();
 
@@ -34,23 +40,22 @@ class Ball {
     }
 
 
-    // Getters
-    method int getX() {
-        return x;
-    }
-    method int getY() {
-        return y;
-    }
+    // PURPOSE: getters
+    // RETURNS: fields of current object
+    method int getX() { return x; }
+    method int getY() { return y; }
 
 
-    //
+    // PURPOSE: frees memory from the ball
+    // CHANGES: memory
     method void dispose() {
         do Memory.deAlloc(this);
         return;
     }
 
 
-    //
+    // PURPOSE: draws ball at the current position on the screen
+    // CHANGES: screen
     method void draw() {
         do Screen.setColor(true);
         do Screen.drawCircle(x, y, RADIUS);
@@ -58,7 +63,8 @@ class Ball {
     }
 
 
-    //
+    // PURPOSE: erases ball at the current position from the screen
+    // CHANGES: screen
     method void erase() {
         do Screen.setColor(false);
         do Screen.drawCircle(x, y, RADIUS);
@@ -66,26 +72,41 @@ class Ball {
     }
 
 
-    // 
+    // PURPOSE: checks whether ball is near screen borders or not
+    //          changes direction of ball movement
+    // CHANGES: dx dy
+
+    // TODO: do better screen borders
+    // TODO: maybe split method to check and change
+    // TODO: probably move border check inside BrickBreakerGame
+
     method void checkBorders() {
-        if (x + RADIUS > 510) { let dx = -2; }
-        if (x + RADIUS < 8) { let dx = 2; }
+        if (x + RADIUS > 510) { let dx = -SPEED; } // right border
+        if (x - RADIUS < 2) { let dx = SPEED; }    // left border
 
-        if (y + RADIUS > 250) { let dy = -2; }
-        if (y + RADIUS < 8) { let dy = 2; }
+        if (y + RADIUS > 254) { let dy = -SPEED; } // bottom border
+        if (y - RADIUS < 2) { let dy = SPEED; }    // up border
         return;
     }
 
 
-    // 
+    // PURPOSE: changes ball movement direction if bounced from platform 
+    // CHANGES: dy
+
+    // TODO: think more closely
+
     method void bounce() {
-        if ( dy > dx ) { let dy = -2; }
-        if ( (dx > 0) & (dx = dy) ) { let dy = -2;}
+        if ( dy > dx ) { let dy = -SPEED; }
+        if ( (dx > 0 ) & ( dx = dy ) ) { let dy = -SPEED; }
         return;
     }
 
 
-    //
+    // PURPOSE: moves ball and displays it on the screen
+    // CHANGES: x y
+
+    // TODO: better draw/erase performance
+
     method void move() {
         
         do erase();
@@ -100,4 +121,4 @@ class Ball {
         return;
     }
 
-}
+} // class

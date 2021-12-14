@@ -1,25 +1,26 @@
 
 
-//
+// PURPOSE: represents a brick breaker game
+// TODO: create a better description
 class BrickBreakerGame {
 
-
-    //
+    // objects of the game
     field Platform platform;
     field Ball ball;
 
 
-    // Constructs a new Brick Breaker game
+    // PURPOSE: constructs a new Brick Breaker game
     constructor BrickBreakerGame new() {
 
-        let platform = Platform.new(256, 220);
+        let platform = Platform.new(256, 200);
         let ball = Ball.new(256, 128);
 
         return this;
     }
 
 
-    // Frees memory from a game
+    // PURPOSE: frees memory from a game
+    // CHANGES: memory
     method void dispose() {
 
         do platform.dispose();
@@ -31,15 +32,18 @@ class BrickBreakerGame {
     }
 
 
-    // checks platform and ball possible bounce
+    // PURPOSE: checks possible bounce between platform and ball
+    // RETURNS: bool
+    
     // TODO: add better platform collision
+
     method bool isBounce() {
-        return (((platform.getX() < ball.getX()) & ( platform.getY() < ball.getY())) &
-                ((ball.getX() < (platform.getX() + 30)) & ( platform.getY() < ball.getY())));
+        return (( (platform.getX() < (ball.getX() - 3 )) & ( platform.getY() < (ball.getY() + 3) )) &
+                (( (ball.getX() + 3) < (platform.getX() + 30)) & ( platform.getY() < (ball.getY() + 3)  )));
     }
 
 
-    // runs the game
+    // PURPOSE: runs brick breaker game
     method void run() {
         
         var char key;

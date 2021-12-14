@@ -1,20 +1,24 @@
 
 
-//
+// PURPOSE: represents a moving platform that user controls
 class Platform {
 
-
-    // Position of a platform on the screen
+    // coordinates of a platform
     field int x, y;
 
-
-    // 
+    // size of a platform
     static int X_SIZE;
     static int Y_SIZE;
+
+    // TODO
+    // static int LEFT_BORDER, RIGHT_BORDER
+
+    // movement speed of a platform
     static int SPEED;
 
 
-    // Constructs a new platform within a given coordinates
+    // PURPOSE: constructs a new platform with given coordinates
+    // CHANGES: memory
     constructor Platform new(int Ax, int Ay) {
         
         let x = Ax;
@@ -30,23 +34,22 @@ class Platform {
     }
 
     
-    // Getters
-    method int getX() {
-        return x;
-    }
-    method int getY() {
-        return y;
-    }
+    // PURPOSE: getters
+    // RETURNS: fields of current object
+    method int getX() { return x; }
+    method int getY() { return y; }
 
     
-    // Cleans memory from Platform object
+    // PURPOSE: cleans memory from Platform object
+    // CHANGES: memory
     method void dispose() {
         do Memory.deAlloc(this);
         return;
     }
 
     
-    // Draws the platform on the screen
+    // PURPOSE: draws platform on the screen
+    // CHANGES: screen
     method void draw() {
         do Screen.setColor(true);
         do Screen.drawRectangle(x, y, x + X_SIZE, y + Y_SIZE);
@@ -54,7 +57,8 @@ class Platform {
     }
 
 
-    // Erases the platform from the screen
+    // PURPOSE: erases platform from the screen
+    // CHANGES: screen
     method void erase() {
         do Screen.setColor(false);
         do Screen.drawRectangle(x, y, x + X_SIZE, y + Y_SIZE);
@@ -62,9 +66,14 @@ class Platform {
     }
 
 
-    // 
+    // PURPOSE: moves platform to the left
+    // CHANGES: x, screen
+
+    // TODO: change draw logic to possible perfomance increase
+    // TODO: probably move border check inside BrickBreakerGame
+
     method void moveLeft() {
-        if (x > 1) {
+        if (x > 2) {
             do erase();
             let x = x - SPEED;
             do draw();
@@ -73,7 +82,12 @@ class Platform {
     }
 
 
-    //
+    // PURPOSE: moves platform to the right
+    // CHANGES: x, screen
+    
+    // TODO: change draw logic to possible perfomance increase
+    // TODO: probably move border check inside BrickBreakerGame
+
     method void moveRight() {
         if (x + X_SIZE < 510) {
             do erase();

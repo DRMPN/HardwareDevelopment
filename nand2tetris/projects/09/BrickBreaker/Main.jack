@@ -1,13 +1,14 @@
 
 
-//
+// main
 class Main {
     
-    //
+    // PURPOSE: creates and runs a new game
     function void main() {
         var BrickBreakerGame game;
         let game = BrickBreakerGame.new();
         do game.run();
+
         do game.dispose();
         return;
     }
