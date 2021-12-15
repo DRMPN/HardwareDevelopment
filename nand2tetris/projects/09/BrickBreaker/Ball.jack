@@ -5,9 +5,6 @@ class Ball {
 
     // Coordinates of a ball
     field int x, y;
-
-    // Speed of a ball
-    static int SPEED;
     
     // Direction of ball movement
     // TODO: maybe enumeration like with directions
@@ -16,20 +13,18 @@ class Ball {
     // Radius of a ball
     static int RADIUS;
 
-    // TODO
-    // static int LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER
+    // Speed of a ball
+    static int SPEED;
 
 
     // PURPOSE: creates a new ball object with given coordinates
     // CHANGES: memory
     constructor Ball new(int Ax, int Ay) {
 
+        do init();
+
         let x = Ax;
         let y = Ay;
-
-        let SPEED = 4;
-
-        let RADIUS = 3;
         
         let dx = SPEED;
         let dy = SPEED;
@@ -37,6 +32,17 @@ class Ball {
         do draw();
 
         return this;
+    }
+
+
+    // PURPOSE: initializes constants for a ball
+    // CHANGES: constants
+    method void init() {
+
+        let RADIUS = 3;
+        let SPEED = 4;
+
+        return;
     }
 
 
@@ -75,17 +81,12 @@ class Ball {
     // PURPOSE: checks whether ball is near screen borders or not
     //          changes direction of ball movement
     // CHANGES: dx dy
+    method void checkBorderBounce(int left_border, int right_border, int top_border, int bottom_border) {
+        if ( (x - RADIUS) < left_border) { let dx = SPEED; }    // left border
+        if ( (x + RADIUS) > right_border) { let dx = -SPEED; }  // right border
 
-    // TODO: do better screen borders
-    // TODO: maybe split method to check and change
-    // TODO: probably move border check inside BrickBreakerGame
-
-    method void checkBorders() {
-        if (x + RADIUS > 510) { let dx = -SPEED; } // right border
-        if (x - RADIUS < 2) { let dx = SPEED; }    // left border
-
-        if (y + RADIUS > 254) { let dy = -SPEED; } // bottom border
-        if (y - RADIUS < 2) { let dy = SPEED; }    // up border
+        if ( (y - RADIUS) < top_border) { let dy = SPEED; }     // top border
+        if ( (y + RADIUS) > bottom_border) { let dy = -SPEED; } // bottom border
         return;
     }
 
@@ -95,7 +96,7 @@ class Ball {
 
     // TODO: think more closely
 
-    method void bounce() {
+    method void platformBounce() {
         if ( dy > dx ) { let dy = -SPEED; }
         if ( (dx > 0 ) & ( dx = dy ) ) { let dy = -SPEED; }
         return;
@@ -107,11 +108,11 @@ class Ball {
 
     // TODO: better draw/erase performance
 
-    method void move() {
+    method void move(int left_border, int right_border, int top_border, int bottom_border) {
         
         do erase();
 
-        do checkBorders();
+        do checkBorderBounce(left_border, right_border, top_border, bottom_border);
 
         let x = x + dx;
         let y = y + dy;

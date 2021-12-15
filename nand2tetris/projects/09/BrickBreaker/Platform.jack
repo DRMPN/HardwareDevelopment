@@ -10,9 +10,6 @@ class Platform {
     static int X_SIZE;
     static int Y_SIZE;
 
-    // TODO
-    // static int LEFT_BORDER, RIGHT_BORDER
-
     // movement speed of a platform
     static int SPEED;
 
@@ -20,20 +17,30 @@ class Platform {
     // PURPOSE: constructs a new platform with given coordinates
     // CHANGES: memory
     constructor Platform new(int Ax, int Ay) {
-        
+
+        do init();
+
         let x = Ax;
         let y = Ay;
 
-        let X_SIZE = 30;
-        let Y_SIZE = 5;
-        let SPEED = 4;
-        
         do draw();
         
         return this;
     }
 
-    
+
+    // PURPOSE: initializes constants for a platform
+    // CHANGES: constants
+    method void init() {
+
+        let X_SIZE = 30;
+        let Y_SIZE = 5;
+        let SPEED = 6;
+
+        return;
+    }
+
+
     // PURPOSE: getters
     // RETURNS: fields of current object
     method int getX() { return x; }
@@ -70,10 +77,9 @@ class Platform {
     // CHANGES: x, screen
 
     // TODO: change draw logic to possible perfomance increase
-    // TODO: probably move border check inside BrickBreakerGame
 
-    method void moveLeft() {
-        if (x > 2) {
+    method void moveLeft(int left_border) {
+        if (x > left_border) {
             do erase();
             let x = x - SPEED;
             do draw();
@@ -86,10 +92,9 @@ class Platform {
     // CHANGES: x, screen
     
     // TODO: change draw logic to possible perfomance increase
-    // TODO: probably move border check inside BrickBreakerGame
 
-    method void moveRight() {
-        if (x + X_SIZE < 510) {
+    method void moveRight(int right_border) {
+        if (x + X_SIZE < right_border) {
             do erase();
             let x = x + SPEED;
             do draw();

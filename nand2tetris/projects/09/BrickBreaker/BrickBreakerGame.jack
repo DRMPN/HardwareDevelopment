@@ -8,14 +8,34 @@ class BrickBreakerGame {
     field Platform platform;
     field Ball ball;
 
+    // constants
+    static int LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER;
+
 
     // PURPOSE: constructs a new Brick Breaker game
     constructor BrickBreakerGame new() {
+
+        do init();
 
         let platform = Platform.new(256, 200);
         let ball = Ball.new(256, 128);
 
         return this;
+    }
+
+
+    // PURPOSE: initizlizes constants for a game
+    // CHANGES: constants
+    // NOTE:    increase platform movement speed -> increase side borders 
+    method void init() {
+        
+        let LEFT_BORDER = 5;
+        let RIGHT_BORDER = 505;
+        
+        let TOP_BORDER = 2;
+        let BOTTOM_BORDER = 254;
+        
+        return;
     }
 
 
@@ -36,8 +56,9 @@ class BrickBreakerGame {
     // RETURNS: bool
     
     // TODO: add better platform collision
+    // TODO: remove hardcoded values
 
-    method bool isBounce() {
+    method bool isPlatformBounce() {
         return (( (platform.getX() < (ball.getX() - 3 )) & ( platform.getY() < (ball.getY() + 3) )) &
                 (( (ball.getX() + 3) < (platform.getX() + 30)) & ( platform.getY() < (ball.getY() + 3)  )));
     }
@@ -53,21 +74,19 @@ class BrickBreakerGame {
 
         while (~exit) {
 
-
             let key = Keyboard.keyPressed();
 
-            if (isBounce()) { do ball.bounce(); }
+            if (isPlatformBounce()) { do ball.platformBounce(); }
 
             do platform.draw();
             
-            do ball.move();
+            do ball.move(LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER);
 
             //do Sys.wait(5);
 
-            if (key = 81)   { let exit = true; }           // q
-            if (key = 130)  { do platform.moveLeft(); }    // left arrow
-            if (key = 132)  { do platform.moveRight(); }   // right arrow
-
+            if (key = 81)   { let exit = true; }                        // q
+            if (key = 130)  { do platform.moveLeft(LEFT_BORDER); }      // left arrow
+            if (key = 132)  { do platform.moveRight(RIGHT_BORDER); }    // right arrow
 
         }
 
