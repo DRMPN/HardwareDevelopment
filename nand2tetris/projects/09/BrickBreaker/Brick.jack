@@ -2,5 +2,67 @@
 
 // 
 class Brick {
+    
+    // coordinates of a brick
+    field int x, y;
+
+
+    // size of a brick
+    static int X_SIZE;
+    static int Y_SIZE;
+
+
+    // PURPOSE: creates a new brick at given coordinates
+    constructor Brick new(int Ax, int Ay) {
+
+        do init();
+
+        let x = Ax;
+        let y = Ay;
+
+        do draw();
+
+        return this;
+    }
+
+
+    // PURPOSE: initializes constants for a brick
+    method void init() {
+        let X_SIZE = 45;
+        let Y_SIZE = 15;
+        return;
+    }
+
+
+    // PURPOSE: getters
+    // RETURNS: fields of current object
+    method int getX() { return x; }
+    method int getY() { return y; }
+
+
+    // PURPOSE: cleans memory from a brick object
+    // CHANGES: memory
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+
+    // PURPOSE: draws a brick on a screen
+    // CHANGES: screen
+    method void draw() {
+        do Screen.setColor(true);
+        do Screen.drawRectangle(x, y, x + X_SIZE, y + Y_SIZE);
+        return;
+    }
+
+
+    // PURPOSE: erases a brick from a screen
+    // CHANGES: screen
+    method void erase() {
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, x + X_SIZE, y + Y_SIZE);
+        return;
+    }
 
 }

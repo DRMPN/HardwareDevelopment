@@ -7,6 +7,8 @@ class BrickBreakerGame {
     // objects of the game
     field Platform platform;
     field Ball ball;
+    // list of bricks
+    field array lob;
 
     // constants
     static int LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER;
@@ -19,6 +21,9 @@ class BrickBreakerGame {
 
         let platform = Platform.new(256, 200);
         let ball = Ball.new(256, 128);
+        let lob = Array.new(3);
+
+        do createBricks();
 
         return this;
     }
@@ -46,13 +51,46 @@ class BrickBreakerGame {
         do platform.dispose();
         do ball.dispose();
 
+        do disposeBricks();
+        // TODO: do lob.dispose(); isn't found, check why
+        do Memory.deAlloc(lob);
+
         do Memory.deAlloc(this);
 
         return;
     }
 
 
-    // PURPOSE: checks possible bounce between platform and ball
+    // PURPOSE: creates bricks to break
+    method void createBricks() {
+        let lob[0] = Brick.new(100, 50);
+        let lob[1] = Brick.new(200, 50);
+        let lob[2] = Brick.new(300, 50);
+        return;
+    }
+
+
+    // PURPOSE: disposes bricks inside list of bricks
+    method void disposeBricks() {
+
+        var int n;
+        var int i;
+        var Brick b;
+
+        let n = 0;
+        let i = 3;
+
+        while (n < i) {
+            let b = lob[n];
+            if (~(b = null)) { do b.dispose(); }
+            let n = n + 1;
+        }
+
+        return;
+    }
+
+
+    // PURPOSE: checks possible bounce between the platform and the ball
     // RETURNS: bool
     
     // TODO: add better platform collision
@@ -61,6 +99,53 @@ class BrickBreakerGame {
     method bool isPlatformBounce() {
         return (( (platform.getX() < (ball.getX() - 3 )) & ( platform.getY() < (ball.getY() + 3) )) &
                 (( (ball.getX() + 3) < (platform.getX() + 30)) & ( platform.getY() < (ball.getY() + 3)  )));
+    }
+
+
+    // PURPOSE: checks possible bounce between a brick and the ball
+    // RETURNS: bool
+
+    // TODO: add better collision check
+    // TODO: remove hardcoded values
+
+
+    method bool isBrickBounce(Brick brick) {
+        if (brick = null) { return false; }
+        else {
+            return ( (( ball.getX() > brick.getX() ) & ( (ball.getY() - 3) < (brick.getY() + 15) ) ) & 
+            ( ( ball.getX() < (brick.getX() + 45) ) & ( (ball.getY() - 3) < (brick.getY() + 15)) ) );
+        } 
+    }
+
+
+    // PURPOSE: 
+    // TODO: CHECK WHAT HAPPENS WITH THE ARRAY WHEN YOU DISPOSE A BRICK 
+    //          guess it points to nowhere?
+    method void isAnyBrickBounce() {
+
+        var int i;
+        var int n;
+        var Brick b;
+
+        let i = 3;
+        let n = 0;
+
+        while (n < i) {
+
+            let b = lob[n];
+
+            // TODO: remove one not null test, either here or in method
+            if ( (isBrickBounce(b) & (~(b = null))) ) { 
+                do ball.brickBounce(); 
+                do b.erase(); 
+                do b.dispose(); 
+                let lob[n] = null;
+                }
+
+            let n = n + 1;
+        }
+
+        return;
     }
 
 
@@ -77,6 +162,8 @@ class BrickBreakerGame {
             let key = Keyboard.keyPressed();
 
             if (isPlatformBounce()) { do ball.platformBounce(); }
+
+            do isAnyBrickBounce();
 
             do platform.draw();
             

@@ -91,14 +91,21 @@ class Ball {
     }
 
 
-    // PURPOSE: changes ball movement direction if bounced from platform 
+    // PURPOSE: changes ball movement direction if bounced from the platform 
     // CHANGES: dy
 
     // TODO: think more closely
 
     method void platformBounce() {
-        if ( dy > dx ) { let dy = -SPEED; }
-        if ( (dx > 0 ) & ( dx = dy ) ) { let dy = -SPEED; }
+        let dy = -SPEED;
+        return;
+    }
+
+
+    // PURPOSE: changes ball movement direction if bounced from a brick
+    // CHANGES: dy
+    method void brickBounce() {
+        let dy = SPEED;
         return;
     }
 
