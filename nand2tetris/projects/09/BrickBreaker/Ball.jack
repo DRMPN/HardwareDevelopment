@@ -1,4 +1,6 @@
 
+// TODO: change ball to a square for possible performance increase
+
 
 // PURPOSE: represents a moving ball
 class Ball {

@@ -4,7 +4,7 @@
 class Platform {
 
     // coordinates of a platform
-    field int x, y;
+    field int x1, y1, x2, y2;
 
     // size of a platform
     static int X_SIZE;
@@ -20,8 +20,11 @@ class Platform {
 
         do init();
 
-        let x = Ax;
-        let y = Ay;
+        let x1 = Ax;
+        let x2 = Ax + X_SIZE;
+
+        let y1 = Ay;
+        let y2 = Ay + Y_SIZE;
 
         do draw();
         
@@ -43,8 +46,10 @@ class Platform {
 
     // PURPOSE: getters
     // RETURNS: fields of current object
-    method int getX() { return x; }
-    method int getY() { return y; }
+    method int getX1() { return x1; }
+    method int getX2() { return x2; }
+    method int getY1() { return y1; }
+    method int getY2() { return y2; }
 
     
     // PURPOSE: cleans memory from Platform object
@@ -59,7 +64,7 @@ class Platform {
     // CHANGES: screen
     method void draw() {
         do Screen.setColor(true);
-        do Screen.drawRectangle(x, y, x + X_SIZE, y + Y_SIZE);
+        do Screen.drawRectangle(x1, y1, x2, y2);
         return;
     }
 
@@ -68,20 +73,22 @@ class Platform {
     // CHANGES: screen
     method void erase() {
         do Screen.setColor(false);
-        do Screen.drawRectangle(x, y, x + X_SIZE, y + Y_SIZE);
+        do Screen.drawRectangle(x1, y1, x2, y2);
         return;
     }
 
 
     // PURPOSE: moves platform to the left
     // CHANGES: x, screen
-
-    // TODO: change draw logic to possible perfomance increase
-
     method void moveLeft(int left_border) {
-        if (x > left_border) {
+        if (x1 > left_border) {
+            //do Screen.setColor(true);
+            //do Screen.drawRectangle((x1 - SPEED), y1, x1, y2);
+            //do Screen.setColor(false);
+            //do Screen.drawRectangle((x2 - SPEED), y1, x2, y2);
             do erase();
-            let x = x - SPEED;
+            let x1 = x1 - SPEED;
+            let x2 = x2 - SPEED;
             do draw();
         }
         return;
@@ -90,13 +97,15 @@ class Platform {
 
     // PURPOSE: moves platform to the right
     // CHANGES: x, screen
-    
-    // TODO: change draw logic to possible perfomance increase
-
     method void moveRight(int right_border) {
-        if (x + X_SIZE < right_border) {
+        if (x2 < right_border) {
+            //do Screen.setColor(true);
+            //do Screen.drawRectangle(x2, y1, (x2+SPEED), y2);
+            //do Screen.setColor(false);
+            //do Screen.drawRectangle(x1, y1, (x1+SPEED), y2);
             do erase();
-            let x = x + SPEED;
+            let x1 = x1 + SPEED;
+            let x2 = x2 + SPEED;
             do draw();
         }
         return;
