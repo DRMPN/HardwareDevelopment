@@ -45,7 +45,7 @@ class Platform {
 
 
     // PURPOSE: getters
-    // RETURNS: fields of current object
+    // RETURNS: fields of a current object
     method int getX1() { return x1; }
     method int getX2() { return x2; }
     method int getY1() { return y1; }

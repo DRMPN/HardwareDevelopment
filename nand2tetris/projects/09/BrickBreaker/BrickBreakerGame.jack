@@ -4,6 +4,17 @@
 // TODO: create a better description
 class BrickBreakerGame {
 
+    // NOTE: DO NOT FORGET ABOUT PERFORMANCE
+
+    // TODO: add a decition about initial ball trajectory launch before the main game loop
+    //       platform moves left -> ball goes left etc.
+    // TODO: draw borders
+    // TODO: add lose/win conditions
+    //      TODO: add lifes
+    //      TODO: add score
+    // BIG TODO: if platform moves to the side when a ball touches it, then change 
+    //           direction of the ball accordingly in direction of movement of the platform
+
     // objects of the game
     field Platform platform;
     field Ball ball;
@@ -37,8 +48,8 @@ class BrickBreakerGame {
         let LEFT_BORDER = 5;
         let RIGHT_BORDER = 505;
         
-        let TOP_BORDER = 2;
-        let BOTTOM_BORDER = 254;
+        let TOP_BORDER = 4;
+        let BOTTOM_BORDER = 252;
         
         return;
     }
@@ -96,12 +107,15 @@ class BrickBreakerGame {
     // RETURNS: bool
     
     // TODO: remove hardcoded values
+    // y check depends on speed / size / initial position of the ball
+    // x size = speed *10; y size = speed * 3 ... etc
 
     method bool isPlatformBounce() {
         var bool y_check;
-        let y_check = ( platform.getY1() < (ball.getY() + 4) ) & ( platform.getY2() > (ball.getY() + 4) );
+        //let y_check = ( platform.getY1() < (ball.getY() + 4) ) & ( platform.getY2() > (ball.getY() + 4) );
+        let y_check = platform.getY1() = (ball.getY() + 4);
 
-        return (( (platform.getX1() < (ball.getX() + 4 )) & y_check ) &
+        return (( (platform.getX1() < (ball.getX() + 4)) & y_check ) &
                 (( (ball.getX() - 4) < (platform.getX2()) & y_check ) ));
     }
 
@@ -119,10 +133,11 @@ class BrickBreakerGame {
 
     method bool isBrickBounce(Brick brick) {
         var bool y_check;
-        let y_check = (ball.getY() - 4) < (brick.getY() + 15) & ( (ball.getY() + 4) > brick.getY()) ;
+        //let y_check = (ball.getY() - 4) < (brick.getY() + 15) & ( (ball.getY() + 4) > brick.getY()) ;
+        let y_check = brick.getY2() = (ball.getY() - 4); 
 
-        return ( (( (ball.getX() + 4) > brick.getX() ) & ( y_check ) ) & 
-                    ( ( (ball.getX() - 4) < (brick.getX() + 45) ) & ( y_check) ) ); 
+        return ( (( (ball.getX() + 4) > brick.getX1() ) & y_check ) & 
+                    ( ( (ball.getX() - 4) < brick.getX2() ) & y_check ) ); 
     }
 
 

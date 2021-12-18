@@ -41,7 +41,7 @@ class Ball {
     // CHANGES: constants
     method void init() {
 
-        let RADIUS = 3;
+        let RADIUS = 2;
         let SPEED = 4;
 
         return;

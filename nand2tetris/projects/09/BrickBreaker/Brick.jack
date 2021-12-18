@@ -1,10 +1,10 @@
 
 
-// 
+// PURPOSE: represents a breakable break
 class Brick {
     
     // coordinates of a brick
-    field int x, y;
+    field int x1, y1, x2, y2;
 
 
     // size of a brick
@@ -17,27 +17,33 @@ class Brick {
 
         do init();
 
-        let x = Ax;
-        let y = Ay;
+        let x1 = Ax;
+        let x2 = Ax + X_SIZE;
+
+        let y1 = Ay;
+        let y2 = Ay + Y_SIZE;
 
         do draw();
-
+        
         return this;
     }
 
 
     // PURPOSE: initializes constants for a brick
     method void init() {
-        let X_SIZE = 45;
-        let Y_SIZE = 15;
+        // x size = 20
+        let X_SIZE = 40;
+        let Y_SIZE = 10;
         return;
     }
 
 
     // PURPOSE: getters
-    // RETURNS: fields of current object
-    method int getX() { return x; }
-    method int getY() { return y; }
+    // RETURNS: fields of a current object
+    method int getX1() { return x1; }
+    method int getX2() { return x2; }
+    method int getY1() { return y1; }
+    method int getY2() { return y2; }
 
 
     // PURPOSE: cleans memory from a brick object
@@ -52,7 +58,7 @@ class Brick {
     // CHANGES: screen
     method void draw() {
         do Screen.setColor(true);
-        do Screen.drawRectangle(x, y, x + X_SIZE, y + Y_SIZE);
+        do Screen.drawRectangle(x1, y1, x2, y2);
         return;
     }
 
@@ -61,7 +67,7 @@ class Brick {
     // CHANGES: screen
     method void erase() {
         do Screen.setColor(false);
-        do Screen.drawRectangle(x, y, x + X_SIZE, y + Y_SIZE);
+        do Screen.drawRectangle(x1, y1, x2, y2);
         return;
     }
 
