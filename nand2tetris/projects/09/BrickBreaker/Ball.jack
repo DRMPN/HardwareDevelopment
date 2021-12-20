@@ -6,7 +6,7 @@
 class Ball {
 
     // Coordinates of a ball
-    field int x, y;
+    field int x1, y1, x2, y2;
     
     // Direction of ball movement
     // TODO: maybe enumeration like with directions
@@ -25,14 +25,17 @@ class Ball {
 
         do init();
 
-        let x = Ax;
-        let y = Ay;
-        
+        let x1 = Ax;
+        let x2 = Ax + RADIUS;
+
+        let y1 = Ay;
+        let y2 = Ay + RADIUS;
+
         let dx = SPEED;
         let dy = SPEED;
 
         do draw();
-
+        
         return this;
     }
 
@@ -41,8 +44,8 @@ class Ball {
     // CHANGES: constants
     method void init() {
 
-        let RADIUS = 2;
-        let SPEED = 4;
+        let RADIUS = 3;
+        let SPEED = 1;
 
         return;
     }
@@ -50,8 +53,10 @@ class Ball {
 
     // PURPOSE: getters
     // RETURNS: fields of current object
-    method int getX() { return x; }
-    method int getY() { return y; }
+    method int getX1() { return x1; }
+    method int getY1() { return y1; }
+    method int getX2() { return x2; }
+    method int getY2() { return y2; }
 
 
     // PURPOSE: frees memory from the ball
@@ -66,7 +71,7 @@ class Ball {
     // CHANGES: screen
     method void draw() {
         do Screen.setColor(true);
-        do Screen.drawCircle(x, y, RADIUS);
+        do Screen.drawRectangle(x1, y1, x2, y2);
         return;
     }
 
@@ -75,7 +80,7 @@ class Ball {
     // CHANGES: screen
     method void erase() {
         do Screen.setColor(false);
-        do Screen.drawCircle(x, y, RADIUS);
+        do Screen.drawRectangle(x1, y1, x2, y2);
         return;
     }
 
@@ -83,33 +88,50 @@ class Ball {
     // PURPOSE: checks whether ball is near screen borders or not
     //          changes direction of ball movement
     // CHANGES: dx dy
-    method void checkBorderBounce(int left_border, int right_border, int top_border, int bottom_border) {
-        if ( (x - RADIUS) < left_border) { let dx = SPEED; }    // left border
-        if ( (x + RADIUS) > right_border) { let dx = -SPEED; }  // right border
 
-        if ( (y - RADIUS) < top_border) { let dy = SPEED; }     // top border
-        if ( (y + RADIUS) > bottom_border) { let dy = -SPEED; } // bottom border
+    // TODO: MOVE INSIDE BRICK BREAKER GAME
+
+    method void checkBorderBounce(int left_border, int right_border, int top_border, int bottom_border) {
+        if ( x1 < left_border) { let dx = SPEED; }    // left border
+        if ( x2 > right_border) { let dx = -SPEED; }  // right border
+
+        if ( y1 < top_border) { let dy = SPEED; }     // top border
+        if ( y2 > bottom_border) { let dy = -SPEED; } // bottom border
         return;
     }
 
 
     // PURPOSE: changes ball movement direction if bounced from the platform 
     // CHANGES: dy
-
-    // TODO: think more closely
-
     method void platformBounce() {
         let dy = -SPEED;
         return;
     }
 
+    // TODO: REFORGE TO TOP_BOUNCE BOTTOM_BOUNCE ... ETC.
 
     // PURPOSE: changes ball movement direction if bounced from a brick
     // CHANGES: dy
-    method void brickBounce() {
+    method void topBrickBounce() {
+        let dy = -SPEED;
+        return;
+    }
+
+    method void bottomBrickBounce() {
         let dy = SPEED;
         return;
     }
+
+    method void leftBrickBounce() {
+        let dx = -SPEED;
+        return;
+    }
+
+    method void rightBrickBounce() {
+        let dx = SPEED;
+        return;
+    }
+
 
 
     // PURPOSE: moves ball and displays it on the screen
@@ -123,8 +145,11 @@ class Ball {
 
         do checkBorderBounce(left_border, right_border, top_border, bottom_border);
 
-        let x = x + dx;
-        let y = y + dy;
+        let x1 = x1 + dx;
+        let y1 = y1 + dy;
+
+        let x2 = x2 + dx;
+        let y2 = y2 + dy;
 
         do draw();
 

@@ -38,7 +38,7 @@ class Platform {
 
         let X_SIZE = 30;
         let Y_SIZE = 5;
-        let SPEED = 6;
+        let SPEED = 2;
 
         return;
     }

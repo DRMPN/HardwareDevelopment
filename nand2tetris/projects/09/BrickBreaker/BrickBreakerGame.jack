@@ -23,6 +23,7 @@ class BrickBreakerGame {
 
     // constants
     static int LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER;
+    static int NUMBER_OF_BRICKS;
 
 
     // PURPOSE: constructs a new Brick Breaker game
@@ -30,11 +31,13 @@ class BrickBreakerGame {
 
         do init();
 
-        let platform = Platform.new(256, 200);
+        let platform = Platform.new(256, 220);
         let ball = Ball.new(256, 128);
-        let lob = Array.new(3);
+
+        let lob = Array.new(NUMBER_OF_BRICKS);
 
         do createBricks();
+        do drawBorders();
 
         return this;
     }
@@ -45,11 +48,13 @@ class BrickBreakerGame {
     // NOTE:    increase platform movement speed -> increase side borders 
     method void init() {
         
-        let LEFT_BORDER = 5;
-        let RIGHT_BORDER = 505;
+        let LEFT_BORDER = 10;
+        let RIGHT_BORDER = 502;
         
-        let TOP_BORDER = 4;
-        let BOTTOM_BORDER = 252;
+        let TOP_BORDER = 10;
+        let BOTTOM_BORDER = 230;
+
+        let NUMBER_OF_BRICKS = 9;
         
         return;
     }
@@ -63,7 +68,6 @@ class BrickBreakerGame {
         do ball.dispose();
 
         do disposeBricks();
-        // TODO: do lob.dispose(); isn't found, check why
         do Memory.deAlloc(lob);
 
         do Memory.deAlloc(this);
@@ -75,9 +79,16 @@ class BrickBreakerGame {
     // PURPOSE: creates bricks to break
     // CHANGES: lob
     method void createBricks() {
-        let lob[0] = Brick.new(100, 50);
-        let lob[1] = Brick.new(200, 50);
-        let lob[2] = Brick.new(300, 50);
+        let lob[0] = Brick.new(50, 50);
+        let lob[1] = Brick.new(150, 50);
+        let lob[2] = Brick.new(250, 50);
+        let lob[3] = Brick.new(350, 50);
+        let lob[4] = Brick.new(450, 50);
+
+        let lob[5] = Brick.new(100,  70);
+        let lob[6] = Brick.new(200, 70);
+        let lob[7] = Brick.new(300, 70);
+        let lob[8] = Brick.new(400, 70);
         return;
     }
 
@@ -91,7 +102,7 @@ class BrickBreakerGame {
         var Brick brick;
 
         let n = 0;
-        let i = 3;
+        let i = NUMBER_OF_BRICKS;
 
         while (n < i) {
             let brick = lob[n];
@@ -103,47 +114,89 @@ class BrickBreakerGame {
     }
 
 
+    // PURPOSE: draws borders of playgraound area on the screen
+    // CHANGES: screen
+
+    // TODO: MEMORY PEEK POKE
+
+    method void drawBorders() {
+    //    var int memAddress;
+    //    var int n;
+    //    var int i;
+    //    
+    //    let memAddress = 16384+512;
+    //    let n = 1;
+    //    let i = 31;
+    //    
+    //    while (n < i) {
+    //        do Memory.poke(memAddress+n, -1);
+    //        let n = n + 1;
+    //    }
+        do Screen.setColor(true);
+        do Screen.drawLine(8, 8, 504, 8);       // top border
+        do Screen.drawLine(8, 8, 8, 232);       // left border
+        do Screen.drawLine(8, 232, 504, 232);   // bottom border
+        do Screen.drawLine(504, 8, 504, 232);   // right border
+        
+        return;
+    }
+
+
     // PURPOSE: checks possible bounce between the platform and the ball
     // RETURNS: bool
-    
-    // TODO: remove hardcoded values
-    // y check depends on speed / size / initial position of the ball
-    // x size = speed *10; y size = speed * 3 ... etc
-
     method bool isPlatformBounce() {
-        var bool y_check;
-        //let y_check = ( platform.getY1() < (ball.getY() + 4) ) & ( platform.getY2() > (ball.getY() + 4) );
-        let y_check = platform.getY1() = (ball.getY() + 4);
+        var bool x_eq_check;
+        var bool y_eq_check;
+        let x_eq_check = (platform.getX1() = ball.getX1()) | (platform.getX2() = ball.getX2());
+        let y_eq_check = platform.getY1() = ball.getY2();
 
-        return (( (platform.getX1() < (ball.getX() + 4)) & y_check ) &
-                (( (ball.getX() - 4) < (platform.getX2()) & y_check ) ));
+        return (((x_eq_check | (ball.getX2() > platform.getX1())) & y_eq_check) &
+                ((x_eq_check | (ball.getX1() < platform.getX2())) & y_eq_check));
     }
 
 
     // PURPOSE: checks possible bounce between a brick and the ball
     // RETURNS: bool
 
-    // TODO: remove hardcoded values
+    // TODO: ADD X AND Y EQUALITY CHECK  
+    // TODO: REMOVE CODE REDUNDANCY
 
-    // TODO: add complete collision check
-    //      between x1 and x2 and near y1 then top
-    //      between x1 and x2 and near y2 then bottom
-    //      near x2 and between y1 and y2 then left
-    //      near x1 and between y1 and y2 then right
-
-    method bool isBrickBounce(Brick brick) {
+    method bool isBottomBrickBounce(Brick brick) {
         var bool y_check;
-        //let y_check = (ball.getY() - 4) < (brick.getY() + 15) & ( (ball.getY() + 4) > brick.getY()) ;
-        let y_check = brick.getY2() = (ball.getY() - 4); 
+        let y_check = brick.getY2() = ball.getY1(); 
 
-        return ( (( (ball.getX() + 4) > brick.getX1() ) & y_check ) & 
-                    ( ( (ball.getX() - 4) < brick.getX2() ) & y_check ) ); 
+        return (((ball.getX2() > brick.getX1()) & y_check) &
+                ((ball.getX1() < brick.getX2()) & y_check));
+    }
+
+    method bool isTopBrickBounce(Brick brick) {
+        var bool y_check;
+        let y_check = brick.getY1() = ball.getY2();
+
+        return (((ball.getX2() > brick.getX1()) & y_check) &
+                ((ball.getX1() < brick.getX2()) & y_check));
+    }
+
+    method bool isLeftBrickBounce(Brick brick) {
+        var bool x_check;
+        let x_check = brick.getX1() = ball.getX2();
+        
+        return ((x_check & (ball.getY2() > brick.getY1())) &
+                (x_check & (ball.getY1() < brick.getY2())));
+    }
+
+    method bool isRightBrickBounce(Brick brick) {
+        var bool x_check;
+        let x_check = brick.getX2() = ball.getX1();
+        
+        return ((x_check & (ball.getY2() > brick.getY1())) &
+                (x_check & (ball.getY1() < brick.getY2())));
     }
 
 
     // PURPOSE: 
 
-    // TODO: add top bounce and side bounces
+    // TODO: REMOVE CODE REDUNDANCY
 
     method void isAnyBrickBounce() {
 
@@ -151,21 +204,47 @@ class BrickBreakerGame {
         var int n;
         var Brick brick;
 
-        let i = 3;
         let n = 0;
+        let i = NUMBER_OF_BRICKS;
 
         while (n < i) {
 
             let brick = lob[n];
 
             if (~(brick = null)) {
-                if (isBrickBounce(brick)) {
-                    do ball.brickBounce();
+
+                if (isTopBrickBounce(brick)) {
+                    do ball.topBrickBounce();
 
                     do brick.erase();
                     do brick.dispose();
                     let lob[n] = null;
                 }
+
+                if (isBottomBrickBounce(brick)) {
+                    do ball.bottomBrickBounce();
+
+                    do brick.erase();
+                    do brick.dispose();
+                    let lob[n] = null;
+                }
+
+                if (isLeftBrickBounce(brick)) {
+                    do ball.leftBrickBounce();
+
+                    do brick.erase();
+                    do brick.dispose();
+                    let lob[n] = null;
+                }
+
+                if (isRightBrickBounce(brick)) {
+                    do ball.rightBrickBounce();
+
+                    do brick.erase();
+                    do brick.dispose();
+                    let lob[n] = null;
+                }
+
             }
 
             let n = n + 1;
@@ -191,9 +270,9 @@ class BrickBreakerGame {
 
             do isAnyBrickBounce();
             
+            do Sys.wait(10);
+            
             do ball.move(LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER);
-
-            //do Sys.wait(5);
 
             if (key = 81)   { let exit = true; }                        // q
             if (key = 130)  { do platform.moveLeft(LEFT_BORDER); }      // left arrow
