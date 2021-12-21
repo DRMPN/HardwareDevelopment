@@ -101,33 +101,24 @@ class Ball {
     }
 
 
-    // PURPOSE: changes ball movement direction if bounced from the platform 
+    // PURPOSE: changes ball movement direction if bounced from a brick or platform
     // CHANGES: dy
-    method void platformBounce() {
+    method void topBounce() {
         let dy = -SPEED;
         return;
     }
 
-    // TODO: REFORGE TO TOP_BOUNCE BOTTOM_BOUNCE ... ETC.
-
-    // PURPOSE: changes ball movement direction if bounced from a brick
-    // CHANGES: dy
-    method void topBrickBounce() {
-        let dy = -SPEED;
-        return;
-    }
-
-    method void bottomBrickBounce() {
+    method void bottomBounce() {
         let dy = SPEED;
         return;
     }
 
-    method void leftBrickBounce() {
+    method void leftBounce() {
         let dx = -SPEED;
         return;
     }
 
-    method void rightBrickBounce() {
+    method void rightBounce() {
         let dx = SPEED;
         return;
     }
@@ -139,11 +130,9 @@ class Ball {
 
     // TODO: better draw/erase performance
 
-    method void move(int left_border, int right_border, int top_border, int bottom_border) {
+    method void move() {
         
         do erase();
-
-        do checkBorderBounce(left_border, right_border, top_border, bottom_border);
 
         let x1 = x1 + dx;
         let y1 = y1 + dy;

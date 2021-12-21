@@ -33,7 +33,7 @@ class BrickBreakerGame {
 
         let platform = Platform.new(256, 220);
         let ball = Ball.new(256, 128);
-
+        
         let lob = Array.new(NUMBER_OF_BRICKS);
 
         do createBricks();
@@ -141,6 +141,19 @@ class BrickBreakerGame {
         return;
     }
 
+    
+    // PURPOSE: checks possible bounce between border lines and the ball
+    method void isBorderBounce() {
+        
+        if ( ball.getX1() < LEFT_BORDER )   { do ball.rightBounce(); } 
+        if ( ball.getX2() > RIGHT_BORDER )  { do ball.leftBounce(); }  
+
+        if ( ball.getY1() < TOP_BORDER )    { do ball.bottomBounce(); }  
+        if ( ball.getY2() > BOTTOM_BORDER ) { do ball.topBounce(); } 
+        
+        return;
+    }
+
 
     // PURPOSE: checks possible bounce between the platform and the ball
     // RETURNS: bool
@@ -214,7 +227,7 @@ class BrickBreakerGame {
             if (~(brick = null)) {
 
                 if (isTopBrickBounce(brick)) {
-                    do ball.topBrickBounce();
+                    do ball.topBounce();
 
                     do brick.erase();
                     do brick.dispose();
@@ -222,7 +235,7 @@ class BrickBreakerGame {
                 }
 
                 if (isBottomBrickBounce(brick)) {
-                    do ball.bottomBrickBounce();
+                    do ball.bottomBounce();
 
                     do brick.erase();
                     do brick.dispose();
@@ -230,7 +243,7 @@ class BrickBreakerGame {
                 }
 
                 if (isLeftBrickBounce(brick)) {
-                    do ball.leftBrickBounce();
+                    do ball.leftBounce();
 
                     do brick.erase();
                     do brick.dispose();
@@ -238,7 +251,7 @@ class BrickBreakerGame {
                 }
 
                 if (isRightBrickBounce(brick)) {
-                    do ball.rightBrickBounce();
+                    do ball.rightBounce();
 
                     do brick.erase();
                     do brick.dispose();
@@ -266,13 +279,15 @@ class BrickBreakerGame {
 
             let key = Keyboard.keyPressed();
 
-            if (isPlatformBounce()) { do ball.platformBounce(); }
+            do isBorderBounce();
+
+            if (isPlatformBounce()) { do ball.topBounce(); }
 
             do isAnyBrickBounce();
             
             do Sys.wait(10);
             
-            do ball.move(LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER);
+            do ball.move();
 
             if (key = 81)   { let exit = true; }                        // q
             if (key = 130)  { do platform.moveLeft(LEFT_BORDER); }      // left arrow
