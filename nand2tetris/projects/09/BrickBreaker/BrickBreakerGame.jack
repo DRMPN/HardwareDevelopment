@@ -6,9 +6,7 @@ class BrickBreakerGame {
 
     // NOTE: DO NOT FORGET ABOUT PERFORMANCE
 
-    // TODO: reforge borders
     // TODO: add generator for rows of blocks
-    // TODO: add better edge collision for blocks
     // TODO: add a decition about initial ball trajectory launch before the main game loop
     //       platform moves left -> ball goes left etc.
     // TODO: add lose/win conditions
@@ -48,18 +46,15 @@ class BrickBreakerGame {
 
     // PURPOSE: initizlizes constants for a game
     // CHANGES: constants
-    
-    // TODO:    create better borders
-
     method void init() {
         
-        let LEFT_BORDER = 10;
-        let RIGHT_BORDER = 502;
+        let LEFT_BORDER = 9;
+        let RIGHT_BORDER = 501;
         
-        let TOP_BORDER = 10;
+        let TOP_BORDER = 9;
         let BOTTOM_BORDER = 230;
 
-        let NUMBER_OF_BRICKS = 24; // in a single row
+        let NUMBER_OF_BRICKS = 24; // TOTAL NUMBER OF BRICKS
         
         return;
     }
@@ -97,7 +92,7 @@ class BrickBreakerGame {
 
         let i = 0;
         let n = NUMBER_OF_BRICKS;
-        let x = 17;
+        let x = LEFT_BORDER + 8;
         let y = 70;
         let shift = 20;
 
@@ -134,6 +129,7 @@ class BrickBreakerGame {
 
     // PURPOSE: draws borders of playgraound area on the screen
     // CHANGES: screen
+    // NOTE: does repeat computations, but only once
 
     // NOTE: INCREASED PERFORMANCE WITH MEMORY PEEK POKE
     //    var int memAddress;
@@ -149,15 +145,13 @@ class BrickBreakerGame {
     //        let n = n + 1;
     //    }
 
-    // TODO:    create better borders
-
     method void drawBorders() {
 
         do Screen.setColor(true);
-        do Screen.drawLine(8, 8, 504, 8);       // top border
-        do Screen.drawLine(504, 8, 504, 232);   // right border
-        do Screen.drawLine(8, 8, 8, 232);       // left border
-        do Screen.drawLine(8, 232, 504, 232);   // bottom border
+        do Screen.drawLine(LEFT_BORDER-1, TOP_BORDER-1, RIGHT_BORDER+1, TOP_BORDER-1);          // top border
+        do Screen.drawLine(RIGHT_BORDER+1, TOP_BORDER-1, RIGHT_BORDER+1, BOTTOM_BORDER+1);      // right border
+        do Screen.drawLine(LEFT_BORDER-1, TOP_BORDER-1, LEFT_BORDER-1, BOTTOM_BORDER+1);        // left border
+        do Screen.drawLine(LEFT_BORDER-1, BOTTOM_BORDER+1, RIGHT_BORDER+1, BOTTOM_BORDER+1);    // bottom border
         
         return;
     }
@@ -178,17 +172,17 @@ class BrickBreakerGame {
 
 
     // PURPOSE: checks possible bounce between the platform and the ball
-    // CHANGES: 
+    // CHANGES: ball movement direction
     method void checkPlatform() {
 
-        var bool x_eq_check;
-        var bool y_eq_check;
+        var bool x_eq;
+        var bool y_eq;
 
-        let x_eq_check = (platform.getX1() = ball.getX1()) | (platform.getX2() = ball.getX2());
-        let y_eq_check = platform.getY1() = ball.getY2();
+        let x_eq = (ball.getX1() = platform.getX2()) | (ball.getX2() = platform.getX1());
+        let y_eq = ball.getY2() = platform.getY1();
 
-        if (((x_eq_check | (ball.getX2() > platform.getX1())) & y_eq_check) &
-            ((x_eq_check | (ball.getX1() < platform.getX2())) & y_eq_check))
+        if (((x_eq | (ball.getX2() > platform.getX1())) & y_eq) &
+            ((x_eq | (ball.getX1() < platform.getX2())) & y_eq))
             { do ball.topBounce(); }
             
         return;
@@ -197,10 +191,7 @@ class BrickBreakerGame {
 
     // PURPOSE: checks possible bounce between a brick and the ball
     // RETURNS: bool
-
-    // TODO: ADD X AND Y EQUALITY CHECK 
-    // TODO: CREATE BETTER NAMES 
-
+    // CHANGES: ball movement direction
     method bool isBrickBounce(Brick brick) {
 
         var bool bounce;
@@ -217,20 +208,47 @@ class BrickBreakerGame {
 
         let bounce = false;
         
-        let x1_eq = ball.getX1() = brick.getX2();
-        let x2_eq = ball.getX2() = brick.getX1();
-        let y1_eq = ball.getY1() = brick.getY2(); 
-        let y2_eq = ball.getY2() = brick.getY1();
+        let x1_eq = ball.getX1() = brick.getX2(); // left
+        let x2_eq = ball.getX2() = brick.getX1(); // right
+        let y1_eq = ball.getY1() = brick.getY2(); // bottom
+        let y2_eq = ball.getY2() = brick.getY1(); // top
 
         let x1_lesser  = ball.getX1() < brick.getX2();
         let y1_lesser  = ball.getY1() < brick.getY2();
         let x2_greater = ball.getX2() > brick.getX1();
         let y2_greater = ball.getY2() > brick.getY1();
 
-        if ((x1_lesser & y1_eq) & (x2_greater & y1_eq)) { let bounce = true; do ball.bottomBounce(); }
+        if ((x1_lesser & y1_eq) & (x2_greater & y1_eq)) { let bounce = true; do ball.bottomBounce(); } // bottom side
         if ((x1_lesser & y2_eq) & (x2_greater & y2_eq)) { let bounce = true; do ball.topBounce(); }
-        if ((x2_eq * y1_lesser) & (x2_eq & y2_greater)) { let bounce = true; do ball.leftBounce(); }
-        if ((x1_eq * y1_lesser) & (x1_eq & y2_greater)) { let bounce = true; do ball.rightBounce(); }
+        if ((x2_eq & y1_lesser) & (x2_eq & y2_greater)) { let bounce = true; do ball.leftBounce(); }
+        if ((x1_eq & y1_lesser) & (x1_eq & y2_greater)) { let bounce = true; do ball.rightBounce(); }
+
+        // bottom left corner
+        if (x2_eq & y1_eq) {
+            let bounce = true;
+            if (ball.getDY() > 0) { do ball.leftBounce(); }
+            else { do ball.bottomBounce(); }
+        }
+
+        // bottom right corner
+        if (x1_eq & y1_eq) { 
+            let bounce = true;
+            if (ball.getDY() > 0) { do ball.rightBounce(); } 
+            else { do ball.bottomBounce(); } 
+        } 
+
+        // upper left corner
+        if (x2_eq & y2_eq) { 
+            let bounce = true; 
+            if (ball.getDY() < 0) { do ball.leftBounce(); }
+            else { do ball.topBounce(); }
+        }
+        // upper right corner
+        if (x1_eq & y2_eq) { 
+            let bounce = true;
+            if (ball.getDY() < 0) { do ball.rightBounce(); }
+            else { do ball.topBounce(); } 
+        }
         
         return bounce;
     }

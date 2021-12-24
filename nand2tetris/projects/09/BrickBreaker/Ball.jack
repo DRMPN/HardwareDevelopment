@@ -55,6 +55,8 @@ class Ball {
     method int getY1() { return y1; }
     method int getX2() { return x2; }
     method int getY2() { return y2; }
+    method int getDX() { return dx; }
+    method int getDY() { return dy; }
 
 
     // PURPOSE: frees memory from the ball
