@@ -1,6 +1,4 @@
 
-// TODO: change ball to a square for possible performance increase
-
 
 // PURPOSE: represents a moving ball
 class Ball {
@@ -85,22 +83,6 @@ class Ball {
     }
 
 
-    // PURPOSE: checks whether ball is near screen borders or not
-    //          changes direction of ball movement
-    // CHANGES: dx dy
-
-    // TODO: MOVE INSIDE BRICK BREAKER GAME
-
-    method void checkBorderBounce(int left_border, int right_border, int top_border, int bottom_border) {
-        if ( x1 < left_border) { let dx = SPEED; }    // left border
-        if ( x2 > right_border) { let dx = -SPEED; }  // right border
-
-        if ( y1 < top_border) { let dy = SPEED; }     // top border
-        if ( y2 > bottom_border) { let dy = -SPEED; } // bottom border
-        return;
-    }
-
-
     // PURPOSE: changes ball movement direction if bounced from a brick or platform
     // CHANGES: dy
     method void topBounce() {
@@ -124,12 +106,8 @@ class Ball {
     }
 
 
-
     // PURPOSE: moves ball and displays it on the screen
     // CHANGES: x y
-
-    // TODO: better draw/erase performance
-
     method void move() {
         
         do erase();
@@ -144,5 +122,6 @@ class Ball {
 
         return;
     }
+
 
 } // class

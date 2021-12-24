@@ -31,9 +31,8 @@ class Brick {
 
     // PURPOSE: initializes constants for a brick
     method void init() {
-        // x size = 20
-        let X_SIZE = 40;
-        let Y_SIZE = 10;
+        let X_SIZE = 15;
+        let Y_SIZE = 8;
         return;
     }
 
@@ -70,5 +69,6 @@ class Brick {
         do Screen.drawRectangle(x1, y1, x2, y2);
         return;
     }
+
 
 }
