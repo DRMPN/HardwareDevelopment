@@ -6,7 +6,7 @@ class BrickBreakerGame {
 
     // NOTE: DO NOT FORGET ABOUT PERFORMANCE
 
-    // TODO: add generator for rows of blocks
+
     // TODO: add a decition about initial ball trajectory launch before the main game loop
     //       platform moves left -> ball goes left etc.
     // TODO: add lose/win conditions
@@ -33,7 +33,7 @@ class BrickBreakerGame {
 
         do init();
 
-        let platform = Platform.new(256, 220);
+        let platform = Platform.new(256, BOTTOM_BORDER - 10);
         let ball = Ball.new(256, 128);
         let lob = Array.new(NUMBER_OF_BRICKS);
 
@@ -48,13 +48,13 @@ class BrickBreakerGame {
     // CHANGES: constants
     method void init() {
         
-        let LEFT_BORDER = 9;
-        let RIGHT_BORDER = 501;
+        let LEFT_BORDER = 49;
+        let RIGHT_BORDER = 461;
         
-        let TOP_BORDER = 9;
-        let BOTTOM_BORDER = 230;
+        let TOP_BORDER = 49;
+        let BOTTOM_BORDER = 200;
 
-        let NUMBER_OF_BRICKS = 24; // TOTAL NUMBER OF BRICKS
+        let NUMBER_OF_BRICKS = 40; // TOTAL NUMBER OF BRICKS
         
         return;
     }
@@ -78,10 +78,6 @@ class BrickBreakerGame {
 
     // PURPOSE: creates bricks to break
     // CHANGES: lob
-
-    // TODO:    create rows
-    //          change x
-
     method void createBricks() {
 
         var int i;
@@ -93,10 +89,15 @@ class BrickBreakerGame {
         let i = 0;
         let n = NUMBER_OF_BRICKS;
         let x = LEFT_BORDER + 8;
-        let y = 70;
+        let y = TOP_BORDER + 10;
+        // distance between bricks by x1 coordinate
         let shift = 20;
 
         while (i < n) {
+            // NOTE: hardcoded value of brick X size
+            // next row of bricks
+            if (x > (RIGHT_BORDER - 15)) { let x = LEFT_BORDER + 8; let y = y + 15; }
+
             let lob[i] = Brick.new(x, y);
             let x = x + shift;
             let i = i + 1; 

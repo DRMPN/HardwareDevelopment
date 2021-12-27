@@ -81,7 +81,7 @@ class Platform {
     // PURPOSE: moves platform to the left
     // CHANGES: x, screen
     method void moveLeft(int left_border) {
-        if (x1 > left_border) {
+        if ((x1 - 1) > left_border) {
             //do Screen.setColor(true);
             //do Screen.drawRectangle((x1 - SPEED), y1, x1, y2);
             //do Screen.setColor(false);
@@ -98,7 +98,7 @@ class Platform {
     // PURPOSE: moves platform to the right
     // CHANGES: x, screen
     method void moveRight(int right_border) {
-        if (x2 < right_border) {
+        if ((x2 + 1) < right_border) {
             //do Screen.setColor(true);
             //do Screen.drawRectangle(x2, y1, (x2+SPEED), y2);
             //do Screen.setColor(false);
