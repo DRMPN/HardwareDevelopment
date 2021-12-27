@@ -6,9 +6,6 @@ class BrickBreakerGame {
 
     // NOTE: DO NOT FORGET ABOUT PERFORMANCE
 
-
-    // TODO: add a decition about initial ball trajectory launch before the main game loop
-    //       platform moves left -> ball goes left etc.
     // TODO: add lose/win conditions
     //      TODO: add lifes
     //          TODO: change bottom border logic
@@ -33,12 +30,13 @@ class BrickBreakerGame {
 
         do init();
 
-        let platform = Platform.new(256, BOTTOM_BORDER - 10);
-        let ball = Ball.new(256, 128);
-        let lob = Array.new(NUMBER_OF_BRICKS);
-
-        do createBricks();
         do drawBorders();
+
+        let platform = Platform.new(255, BOTTOM_BORDER - 10);
+        let ball = Ball.new(254 + 15, BOTTOM_BORDER - 15);
+        
+        let lob = Array.new(NUMBER_OF_BRICKS);
+        do createBricks();
 
         return this;
     }
@@ -289,10 +287,22 @@ class BrickBreakerGame {
     method void run() {
         
         var char key;
+        var bool started;
         var bool exit;
 
+        let started = false;
         let exit = false;
 
+        // TODO: NOTIFY PLAYER TO PRESS LEFT OF RIGHT ARROW
+
+        // let player decide initial ball movement direction
+        while (~started) {
+            let key = Keyboard.keyPressed();
+            if (key = 130) { let started = true; do ball.topBounce(); do ball.leftBounce(); }   // left arrow
+            if (key = 132) { let started = true; do ball.topBounce(); do ball.rightBounce(); }  // right arrow
+        }
+
+        // main game loop
         while (~exit) {
 
             let key = Keyboard.keyPressed();
