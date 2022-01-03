@@ -8,7 +8,11 @@ class Bitmaps {
     static int memAddress;  // declaration 
 
 
-    // PURPOSE: draws 0 on the screen
+    /***************************************************************************************/
+    /*************************************** NUMBERS ***************************************/
+
+
+    // PURPOSE: draws number zero on the screen at specifified location
     // CHANGES: screen
     function void draw0(int location) {
         let memAddress = 16384+location;
@@ -32,7 +36,7 @@ class Bitmaps {
     }
 
 
-    // PURPOSE: draws 1 on the screen
+    // PURPOSE: draws number one on the screen at specifified location
     // CHANGES: screen
     function void draw1(int location) {
         let memAddress = 16384+location;
@@ -55,6 +59,9 @@ class Bitmaps {
         return;
     }
 
+
+    // PURPOSE: draws number two on the screen at specifified location
+    // CHANGES: screen
     function void draw2(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 4080);
@@ -76,6 +83,9 @@ class Bitmaps {
         return;
     }
 
+
+    // PURPOSE: draws number three on the screen at specifified location
+    // CHANGES: screen
     function void draw3(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 4080);
@@ -96,7 +106,10 @@ class Bitmaps {
         do Memory.poke(memAddress+480, 4080);
         return;
     }
+    
 
+    // PURPOSE: draws number four on the screen at specifified location
+    // CHANGES: screen
     function void draw4(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 3072);
@@ -118,6 +131,9 @@ class Bitmaps {
         return;
     }
 
+
+    // PURPOSE: draws number five on the screen at specifified location
+    // CHANGES: screen
     function void draw5(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 16380);
@@ -139,6 +155,9 @@ class Bitmaps {
         return;
     }
 
+
+    // PURPOSE: draws number six on the screen at specifified location
+    // CHANGES: screen
     function void draw6(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 4080);
@@ -160,6 +179,9 @@ class Bitmaps {
         return;
     }
 
+
+    // PURPOSE: draws number seven on the screen at specifified location
+    // CHANGES: screen
     function void draw7(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 16380);
@@ -181,6 +203,9 @@ class Bitmaps {
         return;
     }
 
+
+    // PURPOSE: draws number eight on the screen at specifified location
+    // CHANGES: screen
     function void draw8(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 4080);
@@ -202,6 +227,9 @@ class Bitmaps {
         return;
     }
 
+
+    // PURPOSE: draws number nine on the screen at specifified location
+    // CHANGES: screen
     function void draw9(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 4080);
@@ -222,28 +250,13 @@ class Bitmaps {
         do Memory.poke(memAddress+480, 4080);
         return;
     }
+    
 
-    function void drawS(int location) {
-        let memAddress = 16384+location;
-        do Memory.poke(memAddress+0, 4080);
-        do Memory.poke(memAddress+32, 8184);
-        do Memory.poke(memAddress+64, 14364);
-        do Memory.poke(memAddress+96, 12300);
-        do Memory.poke(memAddress+128, 12);
-        do Memory.poke(memAddress+160, 12);
-        do Memory.poke(memAddress+192, 28);
-        do Memory.poke(memAddress+224, 4088);
-        do Memory.poke(memAddress+256, 8176);
-        do Memory.poke(memAddress+288, 14336);
-        do Memory.poke(memAddress+320, 12288);
-        do Memory.poke(memAddress+352, 12288);
-        do Memory.poke(memAddress+384, 12300);
-        do Memory.poke(memAddress+416, 14364);
-        do Memory.poke(memAddress+448, 8184);
-        do Memory.poke(memAddress+480, 4080);
-        return;
-    }
-
+    /***************************************************************************************/
+    /*************************************** LETTERS ***************************************/
+    
+    // PURPOSE: draws letter C on the screen at specifified location
+    // CHANGES: screen
     function void drawC(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 4080);
@@ -265,48 +278,9 @@ class Bitmaps {
         return;
     }
 
-    function void drawO(int location) {
-        let memAddress = 16384+location;
-        do Memory.poke(memAddress+0, 4080);
-        do Memory.poke(memAddress+32, 8184);
-        do Memory.poke(memAddress+64, 14364);
-        do Memory.poke(memAddress+96, 12300);
-        do Memory.poke(memAddress+128, 12300);
-        do Memory.poke(memAddress+160, 12300);
-        do Memory.poke(memAddress+192, 12300);
-        do Memory.poke(memAddress+224, 12300);
-        do Memory.poke(memAddress+256, 12300);
-        do Memory.poke(memAddress+288, 12300);
-        do Memory.poke(memAddress+320, 12300);
-        do Memory.poke(memAddress+352, 12300);
-        do Memory.poke(memAddress+384, 12300);
-        do Memory.poke(memAddress+416, 14364);
-        do Memory.poke(memAddress+448, 8184);
-        do Memory.poke(memAddress+480, 4080);
-        return;
-    }
 
-    function void drawR(int location) {
-        let memAddress = 16384+location;
-        do Memory.poke(memAddress+0, 4092);
-        do Memory.poke(memAddress+32, 8188);
-        do Memory.poke(memAddress+64, 14348);
-        do Memory.poke(memAddress+96, 12300);
-        do Memory.poke(memAddress+128, 12300);
-        do Memory.poke(memAddress+160, 14348);
-        do Memory.poke(memAddress+192, 8188);
-        do Memory.poke(memAddress+224, 4092);
-        do Memory.poke(memAddress+256, 236);
-        do Memory.poke(memAddress+288, 460);
-        do Memory.poke(memAddress+320, 908);
-        do Memory.poke(memAddress+352, 1804);
-        do Memory.poke(memAddress+384, 3596);
-        do Memory.poke(memAddress+416, 7180);
-        do Memory.poke(memAddress+448, 14348);
-        do Memory.poke(memAddress+480, 12300);
-        return;
-    }
-
+    // PURPOSE: draws letter E on the screen at specifified location
+    // CHANGES: screen
     function void drawE(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 16380);
@@ -327,70 +301,10 @@ class Bitmaps {
         do Memory.poke(memAddress+480, 16380);
         return;
     }
+    
 
-    function void drawColon(int location) {
-        let memAddress = 16384+location;
-        do Memory.poke(memAddress+0, 0);
-        do Memory.poke(memAddress+32, 0);
-        do Memory.poke(memAddress+64, 0);
-        do Memory.poke(memAddress+96, 384);
-        do Memory.poke(memAddress+128, 384);
-        do Memory.poke(memAddress+160, 0);
-        do Memory.poke(memAddress+192, 0);
-        do Memory.poke(memAddress+224, 0);
-        do Memory.poke(memAddress+256, 0);
-        do Memory.poke(memAddress+288, 0);
-        do Memory.poke(memAddress+320, 0);
-        do Memory.poke(memAddress+352, 384);
-        do Memory.poke(memAddress+384, 384);
-        do Memory.poke(memAddress+416, 0);
-        do Memory.poke(memAddress+448, 0);
-        do Memory.poke(memAddress+480, 0);
-        return;
-    }
-
-    function void drawL(int location) {
-        let memAddress = 16384+location;
-        do Memory.poke(memAddress+0, 12);
-        do Memory.poke(memAddress+32, 12);
-        do Memory.poke(memAddress+64, 12);
-        do Memory.poke(memAddress+96, 12);
-        do Memory.poke(memAddress+128, 12);
-        do Memory.poke(memAddress+160, 12);
-        do Memory.poke(memAddress+192, 12);
-        do Memory.poke(memAddress+224, 12);
-        do Memory.poke(memAddress+256, 12);
-        do Memory.poke(memAddress+288, 12);
-        do Memory.poke(memAddress+320, 12);
-        do Memory.poke(memAddress+352, 12);
-        do Memory.poke(memAddress+384, 12);
-        do Memory.poke(memAddress+416, 12);
-        do Memory.poke(memAddress+448, 16380);
-        do Memory.poke(memAddress+480, 16380);
-        return;
-    }
-
-    function void drawI(int location) {
-        let memAddress = 16384+location;
-        do Memory.poke(memAddress+0, 4080);
-        do Memory.poke(memAddress+32, 4080);
-        do Memory.poke(memAddress+64, 384);
-        do Memory.poke(memAddress+96, 384);
-        do Memory.poke(memAddress+128, 384);
-        do Memory.poke(memAddress+160, 384);
-        do Memory.poke(memAddress+192, 384);
-        do Memory.poke(memAddress+224, 384);
-        do Memory.poke(memAddress+256, 384);
-        do Memory.poke(memAddress+288, 384);
-        do Memory.poke(memAddress+320, 384);
-        do Memory.poke(memAddress+352, 384);
-        do Memory.poke(memAddress+384, 384);
-        do Memory.poke(memAddress+416, 384);
-        do Memory.poke(memAddress+448, 4080);
-        do Memory.poke(memAddress+480, 4080);
-        return;
-    }
-
+    // PURPOSE: draws letter F on the screen at specifified location
+    // CHANGES: screen
     function void drawF(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 16380);
@@ -412,32 +326,62 @@ class Bitmaps {
         return;
     }
 
-    function void drawSkull(int location) {
+
+    // PURPOSE: draws letter I on the screen at specifified location
+    // CHANGES: screen
+    function void drawI(int location) {
         let memAddress = 16384+location;
-        do Memory.poke(memAddress+0, 2032);
-        do Memory.poke(memAddress+32, 4088);
-        do Memory.poke(memAddress+64, 8188);
-        do Memory.poke(memAddress+96, 8188);
-        do Memory.poke(memAddress+128, 7644);
-        do Memory.poke(memAddress+160, 6284);
-        do Memory.poke(memAddress+192, 6604);
-        do Memory.poke(memAddress+224, 3960);
-        do Memory.poke(memAddress+256, 9186);
-        do Memory.poke(memAddress+288, 25251);
-        do Memory.poke(memAddress+320, 4100);
-        do Memory.poke(memAddress+352, 1360);
-        do Memory.poke(memAddress+384, 2032);
-        do Memory.poke(memAddress+416, 5092);
-        do Memory.poke(memAddress+448, 24579);
-        do Memory.poke(memAddress+480, 8194);
+        do Memory.poke(memAddress+0, 4080);
+        do Memory.poke(memAddress+32, 4080);
+        do Memory.poke(memAddress+64, 384);
+        do Memory.poke(memAddress+96, 384);
+        do Memory.poke(memAddress+128, 384);
+        do Memory.poke(memAddress+160, 384);
+        do Memory.poke(memAddress+192, 384);
+        do Memory.poke(memAddress+224, 384);
+        do Memory.poke(memAddress+256, 384);
+        do Memory.poke(memAddress+288, 384);
+        do Memory.poke(memAddress+320, 384);
+        do Memory.poke(memAddress+352, 384);
+        do Memory.poke(memAddress+384, 384);
+        do Memory.poke(memAddress+416, 384);
+        do Memory.poke(memAddress+448, 4080);
+        do Memory.poke(memAddress+480, 4080);
         return;
     }
 
-    function void drawV(int location) {
+
+    // PURPOSE: draws letter L on the screen at specifified location
+    // CHANGES: screen
+    function void drawL(int location) {
         let memAddress = 16384+location;
-        do Memory.poke(memAddress+0, 12300);
-        do Memory.poke(memAddress+32, 12300);
-        do Memory.poke(memAddress+64, 12300);
+        do Memory.poke(memAddress+0, 12);
+        do Memory.poke(memAddress+32, 12);
+        do Memory.poke(memAddress+64, 12);
+        do Memory.poke(memAddress+96, 12);
+        do Memory.poke(memAddress+128, 12);
+        do Memory.poke(memAddress+160, 12);
+        do Memory.poke(memAddress+192, 12);
+        do Memory.poke(memAddress+224, 12);
+        do Memory.poke(memAddress+256, 12);
+        do Memory.poke(memAddress+288, 12);
+        do Memory.poke(memAddress+320, 12);
+        do Memory.poke(memAddress+352, 12);
+        do Memory.poke(memAddress+384, 12);
+        do Memory.poke(memAddress+416, 12);
+        do Memory.poke(memAddress+448, 16380);
+        do Memory.poke(memAddress+480, 16380);
+        return;
+    }
+
+
+    // PURPOSE: draws letter O on the screen at specifified location
+    // CHANGES: screen
+    function void drawO(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 4080);
+        do Memory.poke(memAddress+32, 8184);
+        do Memory.poke(memAddress+64, 14364);
         do Memory.poke(memAddress+96, 12300);
         do Memory.poke(memAddress+128, 12300);
         do Memory.poke(memAddress+160, 12300);
@@ -445,57 +389,18 @@ class Bitmaps {
         do Memory.poke(memAddress+224, 12300);
         do Memory.poke(memAddress+256, 12300);
         do Memory.poke(memAddress+288, 12300);
-        do Memory.poke(memAddress+320, 14364);
-        do Memory.poke(memAddress+352, 7224);
-        do Memory.poke(memAddress+384, 3696);
-        do Memory.poke(memAddress+416, 2016);
-        do Memory.poke(memAddress+448, 960);
-        do Memory.poke(memAddress+480, 384);
+        do Memory.poke(memAddress+320, 12300);
+        do Memory.poke(memAddress+352, 12300);
+        do Memory.poke(memAddress+384, 12300);
+        do Memory.poke(memAddress+416, 14364);
+        do Memory.poke(memAddress+448, 8184);
+        do Memory.poke(memAddress+480, 4080);
         return;
     }
 
-    function void drawLeftArrow(int location) {
-        let memAddress = 16384+location;
-        do Memory.poke(memAddress+0, 0);
-        do Memory.poke(memAddress+32, 0);
-        do Memory.poke(memAddress+64, 3584);
-        do Memory.poke(memAddress+96, 1920);
-        do Memory.poke(memAddress+128, 992);
-        do Memory.poke(memAddress+160, 504);
-        do Memory.poke(memAddress+192, 254);
-        do Memory.poke(memAddress+224, -1);
-        do Memory.poke(memAddress+256, -1);
-        do Memory.poke(memAddress+288, 254);
-        do Memory.poke(memAddress+320, 504);
-        do Memory.poke(memAddress+352, 992);
-        do Memory.poke(memAddress+384, 1920);
-        do Memory.poke(memAddress+416, 3584);
-        do Memory.poke(memAddress+448, 0);
-        do Memory.poke(memAddress+480, 0);
-        return;
-    }
 
-    function void drawRightArrow(int location) {
-        let memAddress = 16384+location;
-        do Memory.poke(memAddress+0, 0);
-        do Memory.poke(memAddress+32, 0);
-        do Memory.poke(memAddress+64, 112);
-        do Memory.poke(memAddress+96, 480);
-        do Memory.poke(memAddress+128, 1984);
-        do Memory.poke(memAddress+160, 8064);
-        do Memory.poke(memAddress+192, 32512);
-        do Memory.poke(memAddress+224, -1);
-        do Memory.poke(memAddress+256, -1);
-        do Memory.poke(memAddress+288, 32512);
-        do Memory.poke(memAddress+320, 8064);
-        do Memory.poke(memAddress+352, 1984);
-        do Memory.poke(memAddress+384, 480);
-        do Memory.poke(memAddress+416, 112);
-        do Memory.poke(memAddress+448, 0);
-        do Memory.poke(memAddress+480, 0);
-        return;
-    }
-
+    // PURPOSE: draws letter P on the screen at specifified location
+    // CHANGES: screen
     function void drawP(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 4092);
@@ -517,6 +422,157 @@ class Bitmaps {
         return;
     }
 
+
+    // PURPOSE: draws letter R on the screen at specifified location
+    // CHANGES: screen
+    function void drawR(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 4092);
+        do Memory.poke(memAddress+32, 8188);
+        do Memory.poke(memAddress+64, 14348);
+        do Memory.poke(memAddress+96, 12300);
+        do Memory.poke(memAddress+128, 12300);
+        do Memory.poke(memAddress+160, 14348);
+        do Memory.poke(memAddress+192, 8188);
+        do Memory.poke(memAddress+224, 4092);
+        do Memory.poke(memAddress+256, 236);
+        do Memory.poke(memAddress+288, 460);
+        do Memory.poke(memAddress+320, 908);
+        do Memory.poke(memAddress+352, 1804);
+        do Memory.poke(memAddress+384, 3596);
+        do Memory.poke(memAddress+416, 7180);
+        do Memory.poke(memAddress+448, 14348);
+        do Memory.poke(memAddress+480, 12300);
+        return;
+    }
+
+
+    // PURPOSE: draws letter S on the screen at specifified location
+    // CHANGES: screen
+    function void drawS(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 4080);
+        do Memory.poke(memAddress+32, 8184);
+        do Memory.poke(memAddress+64, 14364);
+        do Memory.poke(memAddress+96, 12300);
+        do Memory.poke(memAddress+128, 12);
+        do Memory.poke(memAddress+160, 12);
+        do Memory.poke(memAddress+192, 28);
+        do Memory.poke(memAddress+224, 4088);
+        do Memory.poke(memAddress+256, 8176);
+        do Memory.poke(memAddress+288, 14336);
+        do Memory.poke(memAddress+320, 12288);
+        do Memory.poke(memAddress+352, 12288);
+        do Memory.poke(memAddress+384, 12300);
+        do Memory.poke(memAddress+416, 14364);
+        do Memory.poke(memAddress+448, 8184);
+        do Memory.poke(memAddress+480, 4080);
+        return;
+    }
+    
+
+    // PURPOSE: draws letter V on the screen at specifified location
+    // CHANGES: screen
+    function void drawV(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 12300);
+        do Memory.poke(memAddress+32, 12300);
+        do Memory.poke(memAddress+64, 12300);
+        do Memory.poke(memAddress+96, 12300);
+        do Memory.poke(memAddress+128, 12300);
+        do Memory.poke(memAddress+160, 12300);
+        do Memory.poke(memAddress+192, 12300);
+        do Memory.poke(memAddress+224, 12300);
+        do Memory.poke(memAddress+256, 12300);
+        do Memory.poke(memAddress+288, 12300);
+        do Memory.poke(memAddress+320, 14364);
+        do Memory.poke(memAddress+352, 7224);
+        do Memory.poke(memAddress+384, 3696);
+        do Memory.poke(memAddress+416, 2016);
+        do Memory.poke(memAddress+448, 960);
+        do Memory.poke(memAddress+480, 384);
+        return;
+    }
+
+
+    /***************************************************************************************/
+    /**************************************** OTHER ****************************************/
+
+
+    // PURPOSE: draws COLON symbol on the screen at specifified location
+    // CHANGES: screen
+    function void drawColon(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 0);
+        do Memory.poke(memAddress+32, 0);
+        do Memory.poke(memAddress+64, 0);
+        do Memory.poke(memAddress+96, 384);
+        do Memory.poke(memAddress+128, 384);
+        do Memory.poke(memAddress+160, 0);
+        do Memory.poke(memAddress+192, 0);
+        do Memory.poke(memAddress+224, 0);
+        do Memory.poke(memAddress+256, 0);
+        do Memory.poke(memAddress+288, 0);
+        do Memory.poke(memAddress+320, 0);
+        do Memory.poke(memAddress+352, 384);
+        do Memory.poke(memAddress+384, 384);
+        do Memory.poke(memAddress+416, 0);
+        do Memory.poke(memAddress+448, 0);
+        do Memory.poke(memAddress+480, 0);
+        return;
+    }
+
+
+    // PURPOSE: draws LEFT ARROW on the screen at specifified location
+    // CHANGES: screen
+    function void drawLeftArrow(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 0);
+        do Memory.poke(memAddress+32, 0);
+        do Memory.poke(memAddress+64, 3584);
+        do Memory.poke(memAddress+96, 1920);
+        do Memory.poke(memAddress+128, 992);
+        do Memory.poke(memAddress+160, 504);
+        do Memory.poke(memAddress+192, 254);
+        do Memory.poke(memAddress+224, -1);
+        do Memory.poke(memAddress+256, -1);
+        do Memory.poke(memAddress+288, 254);
+        do Memory.poke(memAddress+320, 504);
+        do Memory.poke(memAddress+352, 992);
+        do Memory.poke(memAddress+384, 1920);
+        do Memory.poke(memAddress+416, 3584);
+        do Memory.poke(memAddress+448, 0);
+        do Memory.poke(memAddress+480, 0);
+        return;
+    }
+
+    
+    // PURPOSE: draws RIGHT ARROW on the screen at specifified location
+    // CHANGES: screen
+    function void drawRightArrow(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 0);
+        do Memory.poke(memAddress+32, 0);
+        do Memory.poke(memAddress+64, 112);
+        do Memory.poke(memAddress+96, 480);
+        do Memory.poke(memAddress+128, 1984);
+        do Memory.poke(memAddress+160, 8064);
+        do Memory.poke(memAddress+192, 32512);
+        do Memory.poke(memAddress+224, -1);
+        do Memory.poke(memAddress+256, -1);
+        do Memory.poke(memAddress+288, 32512);
+        do Memory.poke(memAddress+320, 8064);
+        do Memory.poke(memAddress+352, 1984);
+        do Memory.poke(memAddress+384, 480);
+        do Memory.poke(memAddress+416, 112);
+        do Memory.poke(memAddress+448, 0);
+        do Memory.poke(memAddress+480, 0);
+        return;
+    }
+
+
+    // PURPOSE: draws CROWN on the screen at specifified location
+    // CHANGES: screen
     function void drawCrown(int location) {
         let memAddress = 16384+location;
         do Memory.poke(memAddress+0, 128);
@@ -537,5 +593,54 @@ class Bitmaps {
         do Memory.poke(memAddress+480, 32767);
         return;
     }
+
+    
+    // PURPOSE: draws SKULL on the screen at specifified location
+    // CHANGES: screen
+    function void drawSkull(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 2032);
+        do Memory.poke(memAddress+32, 4088);
+        do Memory.poke(memAddress+64, 8188);
+        do Memory.poke(memAddress+96, 8188);
+        do Memory.poke(memAddress+128, 7644);
+        do Memory.poke(memAddress+160, 6284);
+        do Memory.poke(memAddress+192, 6604);
+        do Memory.poke(memAddress+224, 3960);
+        do Memory.poke(memAddress+256, 9186);
+        do Memory.poke(memAddress+288, 25251);
+        do Memory.poke(memAddress+320, 4100);
+        do Memory.poke(memAddress+352, 1360);
+        do Memory.poke(memAddress+384, 2032);
+        do Memory.poke(memAddress+416, 5092);
+        do Memory.poke(memAddress+448, 24579);
+        do Memory.poke(memAddress+480, 8194);
+        return;
+    }
+
+
+    // PURPOSE: erases 16x16 pixels at specified location
+    // CHANGES: screen
+    function void erase(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 0);
+        do Memory.poke(memAddress+32, 0);
+        do Memory.poke(memAddress+64, 0);
+        do Memory.poke(memAddress+96, 0);
+        do Memory.poke(memAddress+128, 0);
+        do Memory.poke(memAddress+160, 0);
+        do Memory.poke(memAddress+192, 0);
+        do Memory.poke(memAddress+224, 0);
+        do Memory.poke(memAddress+256, 0);
+        do Memory.poke(memAddress+288, 0);
+        do Memory.poke(memAddress+320, 0);
+        do Memory.poke(memAddress+352, 0);
+        do Memory.poke(memAddress+384, 0);
+        do Memory.poke(memAddress+416, 0);
+        do Memory.poke(memAddress+448, 0);
+        do Memory.poke(memAddress+480, 0);
+        return;
+    }
+
 
 }// class
