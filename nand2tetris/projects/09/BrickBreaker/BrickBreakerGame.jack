@@ -6,26 +6,39 @@ class BrickBreakerGame {
 
     // NOTE: DO NOT FORGET ABOUT PERFORMANCE
 
-    // TODO: move assets into other class
-    // TODO: add lose/win conditions
-    //      TODO: add lifes
-    //          TODO: change bottom border logic
-    //      TODO: add score
-    //          TODO: add counter
-    // TODO: move platform and ball to the middle of the screen
+    // TODO: decrease score with each life loss
+    
+    // TODO: implement pause button / event
+        // BUG: bogged pause and death confirm
+
+    // TODO: implement restart after life loss
+
+    // TODO: implement full restart button
     // TODO: decrease game speed when brick is destroyed 
+    // TODO: increase top platform collision by 1 pixel
     // BIG TODO: if platform moves to the side when a ball touches it, then change 
     //           direction of the ball accordingly in direction of movement of the platform
+
 
     // objects of the game
     field Platform platform;
     field Ball ball;
     // list of bricks
     field array lob;
+    // game stats
+    field int score;
+    field int lifes;
+    field bool exit;
+    field bool pause;
+    field bool confirmed;
 
     // constants
     static int LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER;
     static int NUMBER_OF_BRICKS;
+    static int GAME_OVER_TEXT_POSITION;
+    static int INTRO_TEXT_POSITION;
+    static int SCORE_TEXT_POSITION;
+    static itn LIFES_TEXT_POSITION;
 
 
     // PURPOSE: constructs a new Brick Breaker game
@@ -33,48 +46,20 @@ class BrickBreakerGame {
 
         do init();
 
-        do Bitmaps.drawS(7168);
-        do Bitmaps.drawC(7169);
-        do Bitmaps.drawO(7170);
-        do Bitmaps.drawR(7171);
-        do Bitmaps.drawE(7172);
-        do Bitmaps.drawColon(7173);
-
-        do Bitmaps.draw0(7174);
-        do Bitmaps.draw1(7175);
-        do Bitmaps.draw2(7176);
-        do Bitmaps.draw3(7177);
-        do Bitmaps.draw4(7178);
-        do Bitmaps.draw5(7179);
-        do Bitmaps.draw6(7180);
-        do Bitmaps.draw7(7181);
-        do Bitmaps.draw8(7182);
-        do Bitmaps.draw9(7183);
-
-        do Bitmaps.drawL(7185);
-        do Bitmaps.drawI(7186);
-        do Bitmaps.drawF(7187);
-        do Bitmaps.drawE(7188);
-        do Bitmaps.drawS(7189);
-        do Bitmaps.drawColon(7190);
-        do Bitmaps.drawP(7191);
-
-        do Bitmaps.drawLeftArrow(4013);
-        do Bitmaps.drawO(4014);
-        do Bitmaps.drawV(4015);
-        do Bitmaps.drawSkull(4016);
-        do Bitmaps.drawE(4017);
-        do Bitmaps.drawR(4018);
-        do Bitmaps.drawRightArrow(4019);
-        do Bitmaps.drawCrown(4020);
-
         do drawBorders();
 
         let lob = Array.new(NUMBER_OF_BRICKS);
         do createBricks();
 
-        let ball = Ball.new(254 + 15, BOTTOM_BORDER - 15);
-        let platform = Platform.new(255, BOTTOM_BORDER - 10);
+        let ball = Ball.new(249 + 15, BOTTOM_BORDER - 15);
+        let platform = Platform.new(250, BOTTOM_BORDER - 10);
+
+        let score = 0;
+        let lifes = 3;
+
+        // TODO: print q for quit r for restart
+        do drawScore(SCORE_TEXT_POSITION, score);
+        do drawLifes(LIFES_TEXT_POSITION, lifes);
 
         return this;
     }
@@ -91,6 +76,11 @@ class BrickBreakerGame {
         let BOTTOM_BORDER = 200;
 
         let NUMBER_OF_BRICKS = 40; // TOTAL NUMBER OF BRICKS
+
+        let GAME_OVER_TEXT_POSITION = 4014;
+        let INTRO_TEXT_POSITION = 4010;
+        let SCORE_TEXT_POSITION = 7171;
+        let LIFES_TEXT_POSITION = 7189;
         
         return;
     }
@@ -130,7 +120,7 @@ class BrickBreakerGame {
         let shift = 20;
 
         while (i < n) {
-            // NOTE: hardcoded value of brick X size
+            // NOTE: hardcoded value of brick - X size
             // next row of bricks
             if (x > (RIGHT_BORDER - 15)) { let x = LEFT_BORDER + 8; let y = y + 15; }
 
@@ -193,7 +183,154 @@ class BrickBreakerGame {
         return;
     }
 
+
+    // PURPOSE: erases requested amount of sprites at specified location
+    // CHANGES: screen
+    method void eraseSprite(int location, int length) {
+        
+        var int i;
+        var int n;
+
+        let n = location;
+
+        while (i < length) {
+            do Bitmaps.erase(n);
+            let i = i + 1;
+            let n = n + 1;
+        }
+
+        return;
+    }
     
+
+    // PURPOSE: draws instruciton to start the game on the screen
+    // CHANGES: screen
+    method void drawIntroText(int location) {
+        do Bitmaps.drawP(location);
+        do Bitmaps.drawR(location + 1);
+        do Bitmaps.drawE(location + 2);
+        do Bitmaps.drawS(location + 3);
+        do Bitmaps.drawS(location + 4);
+        // blank
+        do Bitmaps.drawLeftArrow(location + 6);
+        // blank
+        do Bitmaps.drawO(location + 8);
+        do Bitmaps.drawR(location + 9);
+        // blank
+        do Bitmaps.drawRightArrow(location + 11);
+        return;
+    }
+
+
+    // PURPOSE: parses passed number and draws it on specified position of the screen
+    // CHANGES: screen
+    // NOTE: number must be is range 0 - 99;
+    method void drawNumber(int location, int number) {
+
+        if (number > 9) {
+            do drawNumber(location, number / 10); // draw left digit
+            let number = number - (10 * (number / 10)); // draw right digit
+            let location = location + 1; // move cursor
+        }
+
+        if (number = 0) { do Bitmaps.draw0(location); }
+        if (number = 1) { do Bitmaps.draw1(location); }
+        if (number = 2) { do Bitmaps.draw2(location); }
+        if (number = 3) { do Bitmaps.draw3(location); }
+        if (number = 4) { do Bitmaps.draw4(location); }
+        if (number = 5) { do Bitmaps.draw5(location); }
+        if (number = 6) { do Bitmaps.draw6(location); }
+        if (number = 7) { do Bitmaps.draw7(location); }
+        if (number = 8) { do Bitmaps.draw8(location); }
+        if (number = 9) { do Bitmaps.draw9(location); }
+        return;
+    }
+
+
+    // PURPOSE: draws current score of the player on the screen
+    // CHANGES: screen
+    method void drawScore(int location, int amount) {
+        do Bitmaps.drawS(location);
+        do Bitmaps.drawC(location + 1);
+        do Bitmaps.drawO(location + 2);
+        do Bitmaps.drawR(location + 3);
+        do Bitmaps.drawE(location + 4);
+        
+        do Bitmaps.drawColon(location + 5);
+
+        do drawNumber(location + 6, amount);
+
+        return;
+    }
+
+
+    // PURPOSE: draws current amount of lifes on the screen
+    // CHANGES: screen
+    method void drawLifes(int location, int amount) {
+        do Bitmaps.drawL(location + 1);
+        do Bitmaps.drawI(location + 2);
+        do Bitmaps.drawF(location + 3);
+        do Bitmaps.drawE(location + 4);
+        do Bitmaps.drawS(location + 5);
+        do Bitmaps.drawColon(location + 6);
+        
+        do drawNumber(location + 7, amount);
+        return;
+    }
+
+    
+    // PURPOSE: draws OVER text at specified location on the screen
+    // CHANGES: screen
+    method void drawOverText(int location) {
+        do Bitmaps.drawO(location);
+        do Bitmaps.drawV(location + 1);
+        // blank
+        do Bitmaps.drawE(location + 3);
+        do Bitmaps.drawR(location + 4);
+        return;
+    }
+
+
+    // PURPOSE: draws text for a winner on the screen
+    // CHANGES: screen
+    method void drawWinText(int location) {
+        do drawOverText(location);
+        do Bitmaps.drawCrown(location + 2);
+        return;
+    }
+
+
+    // PURPOSE: draws text for a loser on the screen
+    // CHANGES: screen
+    method void drawLoseText(int location) {
+        do drawOverText(location);
+        do Bitmaps.drawSkull(location + 2);
+        return;
+    }
+
+
+    // PURPOSE: changes score on the game screen
+    // CHANGES: exit, score, screen
+    method void increaseScore() {
+        let score = score + 1;
+        do drawScore(SCORE_TEXT_POSITION, score);
+        if (score = NUMBER_OF_BRICKS) { do drawWinText(GAME_OVER_TEXT_POSITION); let exit = true; }
+        return;
+    }
+
+    
+    // PURPOSE: changes available lifes
+    // CHANGES: exit, lifes, screen
+    method void decreaseLifes() {
+        let lifes = lifes - 1;
+        do drawLifes(LIFES_TEXT_POSITION, lifes);
+        if (lifes = 0) { do drawLoseText(GAME_OVER_TEXT_POSITION); let exit = true; }
+        let confirmed = false;
+        let pause = true;
+        return;
+    }
+
+
     // PURPOSE: checks possible bounce between border lines and the ball
     // CHANGES: ball movement direction
     method void checkBorders() {
@@ -202,7 +339,7 @@ class BrickBreakerGame {
         if ( ball.getX2() = RIGHT_BORDER )  { do ball.leftBounce(); }  
 
         if ( ball.getY1() = TOP_BORDER )    { do ball.bottomBounce(); }  
-        if ( ball.getY2() = BOTTOM_BORDER ) { do ball.topBounce(); } 
+        if ( ball.getY2() = BOTTOM_BORDER ) { do ball.topBounce(); do decreaseLifes(); } 
         
         return;
     }
@@ -292,7 +429,7 @@ class BrickBreakerGame {
 
 
     // PURPOSE: checks every brick in lob for possible break
-    // CHANGES: ball movement direction, lob, memory
+    // CHANGES: ball movement direction, lob, memory, score
     method void checkBricks() {
 
         var int i;
@@ -308,7 +445,8 @@ class BrickBreakerGame {
 
             if ( ~(brick = null) ) {
                 if (isBrickBounce(brick)) {
-                    do brick.erase();
+                    do increaseScore(); // NOTE: score change
+                    do brick.erase();  
                     do brick.dispose();
                     let lob[n] = null;
                 }
@@ -326,40 +464,67 @@ class BrickBreakerGame {
         
         var char key;
         var bool started;
-        var bool exit;
 
-        let started = false;
         let exit = false;
+        let pause = false;
+        let started = false;
+        let confirmed = true;
 
-        // TODO: NOTIFY PLAYER TO PRESS LEFT OF RIGHT ARROW
-
-        // let player decide initial ball movement direction
-        while (~started) {
-            let key = Keyboard.keyPressed();
-            if (key = 130) { let started = true; do ball.topBounce(); do ball.leftBounce(); }   // left arrow
-            if (key = 132) { let started = true; do ball.topBounce(); do ball.rightBounce(); }  // right arrow
-        }
-
-        // main game loop
         while (~exit) {
 
-            let key = Keyboard.keyPressed();
+            // let player decide initial ball movement direction
+            while (~started) {
+                // notify player to press left or right arrow
+                do drawIntroText(INTRO_TEXT_POSITION);
+                
+                let key = Keyboard.keyPressed();
+                if (key = 81)   { let exit = true; }                                                // q
+                if (key = 130)  { let started = true; do ball.topBounce(); do ball.leftBounce(); }  // left arrow
+                if (key = 132)  { let started = true; do ball.topBounce(); do ball.rightBounce(); } // right arrow
+            }
 
-            do checkBorders();
+            // erase intro text
+            do eraseSprite(INTRO_TEXT_POSITION, 12);
 
-            do checkPlatform();
+            // main game loop
+            while (~pause) {
 
-            do checkBricks();
-            
-            do Sys.wait(20);
-            
-            do ball.move();
+                let key = Keyboard.keyPressed();
 
-            if (key = 81)   { let exit = true; }                       // q
-            if (key = 130)  { do platform.moveLeft(LEFT_BORDER); }     // left arrow
-            if (key = 132)  { do platform.moveRight(RIGHT_BORDER); }   // right arrow
+                do checkBorders();
 
-        }
+                do checkPlatform();
+
+                do checkBricks();
+                
+                // TODO: change game speed
+                do Sys.wait(5);
+                
+                do ball.move();
+
+                if (key = 81)   { let exit = true; }                        // q
+                if (key = 80)   { let pause = true; do Sys.wait(15); }      // p
+                if (key = 130)  { do platform.moveLeft(LEFT_BORDER); }      // left arrow
+                if (key = 132)  { do platform.moveRight(RIGHT_BORDER); }    // right arrow
+            } // pause
+
+            // confirm each death
+            while (~confirmed) {
+                // TODO: write text on how to continue the game
+                if (key = 81)   { let exit = true; }
+                if (key = 32)   { let confirmed = true; let started = false; let pause = false;}
+            }
+
+            // BUG: bogged pause and death confirm
+
+            // unpause the game
+            while (pause) {
+                let key = Keyboard.keyPressed();
+                if (key = 80)   { let pause = false; do Sys.wait(15); }
+                if (key = 81)   { let exit = true; }
+            }
+
+        } //exit
 
         return;
     }
