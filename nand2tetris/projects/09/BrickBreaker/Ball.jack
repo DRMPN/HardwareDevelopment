@@ -23,11 +23,7 @@ class Ball {
 
         do init();
 
-        let x1 = Ax;
-        let x2 = Ax + RADIUS;
-
-        let y1 = Ay;
-        let y2 = Ay + RADIUS;
+        do setPosition(Ax, Ay);
 
         let dx = SPEED;
         let dy = SPEED;
@@ -86,7 +82,7 @@ class Ball {
 
 
     // PURPOSE: changes ball movement direction if bounced from a brick or platform
-    // CHANGES: dy
+    // CHANGES: dy, dx
     method void topBounce() {
         let dy = -SPEED;
         return;
@@ -104,6 +100,18 @@ class Ball {
 
     method void rightBounce() {
         let dx = SPEED;
+        return;
+    }
+
+
+    // PURPOSE: sets position of the ball of the screen
+    // CHANGES: x1, y1, x2, y2
+    method void setPosition(int Ax, int Ay){
+        let x1 = Ax;
+        let x2 = Ax + RADIUS;
+
+        let y1 = Ay;
+        let y2 = Ay + RADIUS;
         return;
     }
 

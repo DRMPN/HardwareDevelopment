@@ -20,11 +20,7 @@ class Platform {
 
         do init();
 
-        let x1 = Ax;
-        let x2 = Ax + X_SIZE;
-
-        let y1 = Ay;
-        let y2 = Ay + Y_SIZE;
+        do setPosition(Ax, Ay);
 
         do draw();
         
@@ -74,6 +70,16 @@ class Platform {
     method void erase() {
         do Screen.setColor(false);
         do Screen.drawRectangle(x1, y1, x2, y2);
+        return;
+    }
+
+
+    method void setPosition(int Ax, int Ay) {
+        let x1 = Ax;
+        let x2 = Ax + X_SIZE;
+
+        let y1 = Ay;
+        let y2 = Ay + Y_SIZE;
         return;
     }
 
