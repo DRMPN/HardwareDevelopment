@@ -4,18 +4,16 @@
 // TODO: create a better description
 class BrickBreakerGame {
 
-    // NOTE: DO NOT FORGET ABOUT PERFORMANCE
-
     // TODO: decrease score with each life loss
-    
-    // TODO: implement pause button / event
-        // BUG: bogged pause and death confirm
 
-    // TODO: implement restart after life loss
+    // TODO: complete implementation of restart after life loss
+    //      1.  ball/platform position reset, erase -> move -> draw -> wait
+    //      2.  infrom player to press 'space'
 
-    // TODO: implement full restart button
     // TODO: decrease game speed when brick is destroyed 
     // TODO: increase top platform collision by 1 pixel
+    // TODO: implement full restart button
+    // BIG TODO: implement pause if possible
     // BIG TODO: if platform moves to the side when a ball touches it, then change 
     //           direction of the ball accordingly in direction of movement of the platform
 
@@ -36,9 +34,7 @@ class BrickBreakerGame {
     static int LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER;
     static int NUMBER_OF_BRICKS;
     static int GAME_OVER_TEXT_POSITION;
-    static int INTRO_TEXT_POSITION;
-    static int SCORE_TEXT_POSITION;
-    static itn LIFES_TEXT_POSITION;
+    static int INTRO_TEXT_POSITION, SCORE_TEXT_POSITION, LIFES_TEXT_POSITION;
 
 
     // PURPOSE: constructs a new Brick Breaker game
@@ -334,13 +330,11 @@ class BrickBreakerGame {
     // PURPOSE: checks possible bounce between border lines and the ball
     // CHANGES: ball movement direction
     method void checkBorders() {
-        
-        if ( ball.getX1() = LEFT_BORDER )   { do ball.rightBounce(); } 
-        if ( ball.getX2() = RIGHT_BORDER )  { do ball.leftBounce(); }  
+        if ( ball.getX1() = LEFT_BORDER )   { do ball.rightBounce(); }
+        if ( ball.getX2() = RIGHT_BORDER )  { do ball.leftBounce(); }
 
-        if ( ball.getY1() = TOP_BORDER )    { do ball.bottomBounce(); }  
-        if ( ball.getY2() = BOTTOM_BORDER ) { do ball.topBounce(); do decreaseLifes(); } 
-        
+        if ( ball.getY1() = TOP_BORDER )    { do ball.bottomBounce(); }
+        if ( ball.getY2() = BOTTOM_BORDER ) { do ball.topBounce(); do decreaseLifes(); }
         return;
     }
 
@@ -488,6 +482,8 @@ class BrickBreakerGame {
 
             // main game loop
             while (~pause) {
+                // TODO: change game speed
+                do Sys.wait(5);
 
                 let key = Keyboard.keyPressed();
 
@@ -497,31 +493,20 @@ class BrickBreakerGame {
 
                 do checkBricks();
                 
-                // TODO: change game speed
-                do Sys.wait(5);
-                
                 do ball.move();
 
                 if (key = 81)   { let exit = true; }                        // q
-                if (key = 80)   { let pause = true; do Sys.wait(15); }      // p
                 if (key = 130)  { do platform.moveLeft(LEFT_BORDER); }      // left arrow
                 if (key = 132)  { do platform.moveRight(RIGHT_BORDER); }    // right arrow
-            } // pause
-
-            // confirm each death
-            while (~confirmed) {
-                // TODO: write text on how to continue the game
-                if (key = 81)   { let exit = true; }
-                if (key = 32)   { let confirmed = true; let started = false; let pause = false;}
             }
 
-            // BUG: bogged pause and death confirm
-
-            // unpause the game
-            while (pause) {
+            // confirm each life loss
+            while (~confirmed) {
+                // TODO: write text on how to continue the game
+                // TODO: reset platform and ball position
                 let key = Keyboard.keyPressed();
-                if (key = 80)   { let pause = false; do Sys.wait(15); }
-                if (key = 81)   { let exit = true; }
+                if (key = 81)   { let exit = true; }    // q
+                if (key = 32)   { let confirmed = true; let started = false; let pause = false;} // space
             }
 
         } //exit
