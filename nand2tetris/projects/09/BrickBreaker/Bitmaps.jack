@@ -254,6 +254,29 @@ class Bitmaps {
 
     /***************************************************************************************/
     /*************************************** LETTERS ***************************************/
+
+    // PURPOSE: draws letter A on the screen at specifified location
+    // CHANGES: screen
+    function void drawA(int location) {
+        let memAddress = 16384+location;
+        do Memory.poke(memAddress+0, 960);
+        do Memory.poke(memAddress+32, 2016);
+        do Memory.poke(memAddress+64, 3696);
+        do Memory.poke(memAddress+96, 7224);
+        do Memory.poke(memAddress+128, 14364);
+        do Memory.poke(memAddress+160, 12300);
+        do Memory.poke(memAddress+192, 12300);
+        do Memory.poke(memAddress+224, 12300);
+        do Memory.poke(memAddress+256, 12300);
+        do Memory.poke(memAddress+288, 16380);
+        do Memory.poke(memAddress+320, 16380);
+        do Memory.poke(memAddress+352, 12300);
+        do Memory.poke(memAddress+384, 12300);
+        do Memory.poke(memAddress+416, 12300);
+        do Memory.poke(memAddress+448, 12300);
+        do Memory.poke(memAddress+480, 12300);
+        return;
+    }
     
     // PURPOSE: draws letter C on the screen at specifified location
     // CHANGES: screen

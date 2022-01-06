@@ -1,9 +1,8 @@
 
 
-// main
 class Main {
     
-    // PURPOSE: creates and runs a new game
+    // PURPOSE: creates and runs a new brick breaker game
     function void main() {
         var BrickBreakerGame game;
         let game = BrickBreakerGame.new();
@@ -12,4 +11,5 @@ class Main {
         do game.dispose();
         return;
     }
+
 }

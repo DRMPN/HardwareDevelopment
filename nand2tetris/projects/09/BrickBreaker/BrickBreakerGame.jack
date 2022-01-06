@@ -1,20 +1,22 @@
 
 
+/*
+* All you have to do in this game is to break all the bricks on the screen.
+* Press left or right arrow to move platform around.
+* Press q to leave the game.
+* If the ball touches the bottom border, you lose one life.
+* Try to not lose any lifes, while playing this game, but also, don't forget, you have 3 of them to spend!
+* Pretty simple game, isn't it? Just be patient :)
+*/
+
 // PURPOSE: represents a brick breaker game
-// TODO: create a better description
 class BrickBreakerGame {
 
-    // TODO: decrease score with each life loss
 
-    // TODO: complete implementation of restart after life loss
-    //      1.  ball/platform position reset, erase -> move -> draw -> wait
-    //      2.  infrom player to press 'space'
-
-    // TODO: decrease game speed when brick is destroyed 
-    // TODO: increase top platform collision by 1 pixel
-    // TODO: implement full restart button
-    // BIG TODO: implement pause if possible
-    // BIG TODO: if platform moves to the side when a ball touches it, then change 
+    // IDEA: decrease score with each life loss
+    // BIG IDIA: implement restart button if possible
+    // BIG IDIA: implement pause if possible
+    // BIG IDIA: if platform moves to the side when a ball touches it, then change 
     //           direction of the ball accordingly in direction of movement of the platform
 
 
@@ -24,36 +26,38 @@ class BrickBreakerGame {
     // list of bricks
     field array lob;
     // game stats
+    field int game_speed;
     field int score;
     field int lifes;
     field bool exit;
     field bool pause;
     field bool confirmed;
+    field bool switch;
 
     // constants
     static int LEFT_BORDER, RIGHT_BORDER, TOP_BORDER, BOTTOM_BORDER;
     static int NUMBER_OF_BRICKS;
     static int GAME_OVER_TEXT_POSITION;
     static int INTRO_TEXT_POSITION, SCORE_TEXT_POSITION, LIFES_TEXT_POSITION;
+    static int BALL_X_POSITION, BALL_Y_POSITION;
+    static int PLATFORM_X_POSITION, PLATFORM_Y_POSITION;
 
 
     // PURPOSE: constructs a new Brick Breaker game
     constructor BrickBreakerGame new() {
-
         do init();
 
         do drawBorders();
 
+        // create and initialize objects of the game
         let lob = Array.new(NUMBER_OF_BRICKS);
         do createBricks();
-
-        let ball = Ball.new(249 + 15, BOTTOM_BORDER - 15);
-        let platform = Platform.new(250, BOTTOM_BORDER - 10);
+        let ball = Ball.new(BALL_X_POSITION, BALL_Y_POSITION);
+        let platform = Platform.new(PLATFORM_X_POSITION, PLATFORM_Y_POSITION);
 
         let score = 0;
         let lifes = 3;
 
-        // TODO: print q for quit r for restart
         do drawScore(SCORE_TEXT_POSITION, score);
         do drawLifes(LIFES_TEXT_POSITION, lifes);
 
@@ -61,9 +65,11 @@ class BrickBreakerGame {
     }
 
 
-    // PURPOSE: initizlizes constants for a game
+    // PURPOSE: initizlizes game constants
     // CHANGES: constants
     method void init() {
+
+        let game_speed = 5;
         
         let LEFT_BORDER = 49;
         let RIGHT_BORDER = 461;
@@ -72,6 +78,10 @@ class BrickBreakerGame {
         let BOTTOM_BORDER = 200;
 
         let NUMBER_OF_BRICKS = 40; // TOTAL NUMBER OF BRICKS
+        let BALL_X_POSITION = 249 + 15;                 // center of the platform
+        let BALL_Y_POSITION = BOTTOM_BORDER - 15;       // sits on the platform
+        let PLATFORM_X_POSITION = 250;                  // center of the screen
+        let PLATFORM_Y_POSITION = BOTTOM_BORDER - 10;   // sits on the border
 
         let GAME_OVER_TEXT_POSITION = 4014;
         let INTRO_TEXT_POSITION = 4010;
@@ -305,24 +315,43 @@ class BrickBreakerGame {
     }
 
 
+    // PURPOSE: draws text for each life loss event
+    // CHANGES: screen
+    method void drawLifeLossText(int location) {
+        do Bitmaps.drawP(location);
+        do Bitmaps.drawR(location + 1);
+        do Bitmaps.drawE(location + 2);
+        do Bitmaps.drawS(location + 3);
+        do Bitmaps.drawS(location + 4);
+        // blank
+        do Bitmaps.drawS(location + 6);
+        do Bitmaps.drawP(location + 7);
+        do Bitmaps.drawA(location + 8);
+        do Bitmaps.drawC(location + 9);
+        do Bitmaps.drawE(location + 10);
+        return;
+    }
+
+
     // PURPOSE: changes score on the game screen
-    // CHANGES: exit, score, screen
+    // CHANGES: switch, game_speed, pause, exit, score, screen
     method void increaseScore() {
-        let score = score + 1;
-        do drawScore(SCORE_TEXT_POSITION, score);
-        if (score = NUMBER_OF_BRICKS) { do drawWinText(GAME_OVER_TEXT_POSITION); let exit = true; }
+        let score = score + 1; // increase score
+        do drawScore(SCORE_TEXT_POSITION, score); // display change on the screen
+        if (score = NUMBER_OF_BRICKS) { do drawWinText(GAME_OVER_TEXT_POSITION); let exit = true; let pause = true; } // game over
+        if (switch) { let game_speed = game_speed + 1; let switch = false; }
+        else { let switch = true; }
         return;
     }
 
     
     // PURPOSE: changes available lifes
-    // CHANGES: exit, lifes, screen
+    // CHANGES: cpmforirmed, pause, exit, lifes, screen
     method void decreaseLifes() {
-        let lifes = lifes - 1;
-        do drawLifes(LIFES_TEXT_POSITION, lifes);
-        if (lifes = 0) { do drawLoseText(GAME_OVER_TEXT_POSITION); let exit = true; }
-        let confirmed = false;
-        let pause = true;
+        let lifes = lifes - 1; // decrease lifes
+        do drawLifes(LIFES_TEXT_POSITION, lifes); // display change on the screen
+        if (lifes = 0) { do drawLoseText(GAME_OVER_TEXT_POSITION); let exit = true; } // game over 
+        let confirmed = false; let pause = true; // pause after each life loss
         return;
     }
 
@@ -347,7 +376,7 @@ class BrickBreakerGame {
         var bool y_eq;
 
         let x_eq = (ball.getX1() = platform.getX2()) | (ball.getX2() = platform.getX1());
-        let y_eq = ball.getY2() = platform.getY1();
+        let y_eq = ball.getY2() = (platform.getY1() - 1);
 
         if (((x_eq | (ball.getX2() > platform.getX1())) & y_eq) &
             ((x_eq | (ball.getX1() < platform.getX2())) & y_eq))
@@ -453,7 +482,21 @@ class BrickBreakerGame {
     }
 
 
+    // PURPOSE: resets position of the ball and platform to its initial 
+    // CHANGES: ball, platform, screen
+    method void resetBallAndPlatform() {
+        do ball.erase();
+        do platform.erase();
+        do ball.setPosition(BALL_X_POSITION, BALL_Y_POSITION);
+        do platform.setPosition(PLATFORM_X_POSITION, PLATFORM_Y_POSITION);
+        do ball.draw();
+        do platform.draw();
+        return;
+    }
+
+
     // PURPOSE: runs brick breaker game
+    // CHANGES: a lot of stuff
     method void run() {
         
         var char key;
@@ -463,8 +506,12 @@ class BrickBreakerGame {
         let pause = false;
         let started = false;
         let confirmed = true;
+        let switch = false;
 
         while (~exit) {
+
+            // move ball and platform to its initial position on the screen
+            do resetBallAndPlatform();
 
             // let player decide initial ball movement direction
             while (~started) {
@@ -483,7 +530,7 @@ class BrickBreakerGame {
             // main game loop
             while (~pause) {
                 // TODO: change game speed
-                do Sys.wait(5);
+                do Sys.wait(game_speed);
 
                 let key = Keyboard.keyPressed();
 
@@ -501,12 +548,18 @@ class BrickBreakerGame {
             }
 
             // confirm each life loss
-            while (~confirmed) {
-                // TODO: write text on how to continue the game
-                // TODO: reset platform and ball position
+            while ((~confirmed) & ~(lifes = 0)) {
+                // notify player to press space
+                do drawLifeLossText(INTRO_TEXT_POSITION);
+
                 let key = Keyboard.keyPressed();
-                if (key = 81)   { let exit = true; }    // q
-                if (key = 32)   { let confirmed = true; let started = false; let pause = false;} // space
+                if (key = 81)   { let exit = true; }                                                // q
+                if (key = 32)   { let confirmed = true; let started = false; let pause = false;}    // space
+            }
+
+            // erase life loss text at the center of the screen, but not when game is already over
+            if ((~(lifes = 0)) | (~(score = NUMBER_OF_BRICKS))) {
+                do eraseSprite(INTRO_TEXT_POSITION, 12);
             }
 
         } //exit
