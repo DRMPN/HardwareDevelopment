@@ -1,0 +1,1 @@
+class SquareGame  {field Square square;field int direction;constructor SquareGame new() {let square = Square.new(0, 0, 30);let direction = 0;return this;}class newTest  {field bool kek}
