@@ -1,3 +1,4 @@
+import re
 import sys
 from enum import Enum, auto
 
@@ -24,22 +25,37 @@ class JackTokenizer():
         self.current_token = None
         self.current_token_number = 0
 
-        # TODO: maybe refactor?
         try:
             with open(path, 'r') as f:
-                for _, line in enumerate(f):
-                    self.preprocess_line(line)
+                self.preprocess_data(f)
         except OSError:
             sys.exit(f"Unable to open {path}")
 
+
+    # PURPOSE: removes any Jack comments and prepares data for tokenizing
+    def preprocess_data(self, file):
+        lines = iter(file)
+        while True:
+            try:
+                next_line = next(lines)
+                # start of block comment is found
+                if re.search(r'\/\*', next_line) is not None:
+                    # cut block comment out of a code line
+                    inline_block_comment = ''.join(re.split(r'\/\*.*\*\/|\/\*.*', next_line))
+                    self.preprocess_line(inline_block_comment)
+                    # skip content in block comment
+                    while re.search(r'.*\*\/', next_line) is None: 
+                        next_line = next(lines)
+                # start of block comment is not found
+                else: self.preprocess_line(next_line)
+            except:
+                break
+
     
-    # PURPOSE:  removes Jack comments and trailing whitespaces
+    # PURPOSE:  removes inline Jack comments, whitespaces and empty lines.
     # CHANGES:  data, data_size
-    # BUG:  DOESN'T REMOVE BLOCK COMMENTS
-    #       IN SQUARE DIRECTORY
     def preprocess_line(self, line: str) -> None:
-        # TODO: line.startswith('//') etc
-        p_line = line.split('//')[0].split('/*')[0].strip() # remove comments
+        p_line = line.split('//')[0].strip()
         if p_line != '':
             self.data_size += len(p_line)
             self.data += p_line

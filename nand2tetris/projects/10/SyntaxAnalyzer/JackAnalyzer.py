@@ -29,7 +29,7 @@ def main():
     for fp in list_of_fps:
         JT = JackTokenizer(fp)
         try:
-            tokens_fp = fp.split('.')[0] + 'Test.xml'
+            tokens_fp = fp.split('.')[0] + 'Tokens.xml' # TODO: change to T.xml
             tokenizeInput(JT, tokens_fp)
         except OSError:
             sys.exit(f"Unable to create {fp}")
