@@ -1,4 +1,5 @@
-
+import sys
+from JackTokenizer import JackTokenizer, LexicalElement
 
 # Effects the actual compilation output. Gets its input from a JackTokenizer 
 #   and emits its parsed structure into an output file/stream. The output 
@@ -11,18 +12,85 @@
 class CompilationEngine():
     
 
+    # TODO:
+    #   1. handle everything except expressions
+    #   2. test it on the expressionless Square Dance
+    #   3. extend the parser to handle expressions as well
+    #   4. test it on the square dance and array test
+
+
     # PURPOSE:  Creates a new compilation engine with the given input and output.
     #           The next routine called must be compileClass().
-    def __init__(self, input, output) -> None:
-        pass
+    # ASSUMES:  Passed paths are absolute.
+    def __init__(self, input_path, output_path) -> None:
+        
+        self.JT = JackTokenizer(input_path)
+        
+        try: self.out_file = open(output_path, 'w')
+        except OSError: sys.exit(f'Unable to create {output_path}')
+        
+
+    # PURPOSE:  Closes output file and frees the memory.
+    def dispose(self) -> None:
+        self.out_file.close()
 
 
-    # CompileClass
+    # PURPOSE:  Compiles a complete class.
+    # class className { classVarDec* subroutineDec* }
+    def compileClass(self) -> None:
+        
+        # NOTE: new function: advance tokenizer
+        # ...0(self):
+        #   if self.JT.hasMoreTokens(): self.JT.advance()
+        #   else: return
+
+        # NOTE: new function: create output line
+        # ...1(self, level) -> str:
+        #   indent = level * '  ' # 2 spaces
+        #   token_type = ...2()
+        #   return f'{indent}<{token_type}> {self.JT.current_token} </{token_type}> \n'
+
+        # NOTE: new function: parse type of token
+        # ...2(self) -> str:
+        #   type = self.JT.tokenType()
+        #   if type == KEYBOARD: return 'keyboard'
+        #   ... etc
+
+        if self.eat('class'): 
+            self.out_file.write('<class>\n')
+            self.out_file.write('  <keyword> class </keyword>\n')
+            self.JT.advance()
+            self.out_file.write(f'  <identifier> {self.JT.current_token} </identifier>\n')
+        else: return
+
+
+    def eat(self, string):
+        return self.JT.current_token == string
+
+    #   while ( expression ) { statements }
+    #      eat while -> code to handle 'while'
+    #      eat (
+    #      compileexpression()
+    #      eat )
+    #      eat {
+    #      compile statements
+    #      eat }
+
+
+    # eat(string) {
+    # if currentToken != string
+    #   error
+    # else
+    #   advance
+    # }
+
+
     # CompileClassVarDec
     # CompileSubroutine
     # compileParameterList
     # compileVarDec
     # compileStatements
+    # ??? compileStatement
     # compileDo
     # compileLet
     # compileWhile
