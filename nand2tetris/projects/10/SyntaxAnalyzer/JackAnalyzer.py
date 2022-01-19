@@ -1,6 +1,6 @@
 import os
 import sys
-from JackTokenizer import JackTokenizer, LexicalElement
+from JackTokenizer import * # TODO: maybe useless
 from CompilationEngine import *
 
 
@@ -38,6 +38,8 @@ def main():
         CM = CompilationEngine(in_path, out_path)
         CM.compileClass()
         CM.dispose() # Close output file
+        
+        print('DONE') # TODO: remove
 
     
     # # tokenize each file by file_path

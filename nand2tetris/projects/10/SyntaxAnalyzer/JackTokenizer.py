@@ -4,11 +4,11 @@ from enum import Enum, auto
 
 
 class LexicalElement(Enum):
-    KEYWORD = auto()
-    SYMBOL = auto()
-    IDENTIFIER = auto()
-    INT_CONST = auto()
-    STRING_CONST = auto()
+    KEYWORD = 'keyword'
+    SYMBOL = 'symbol'
+    IDENTIFIER = 'identifier'
+    INT_CONST = 'integerConstant'
+    STRING_CONST = 'stringConstant'
 
 
 # Removes all comments and white space from the input stream 
@@ -124,8 +124,8 @@ class JackTokenizer():
 
     # PURPOSE:  Returns the character which is the current token. 
     # NOTE: Should be called onlywhen tokenType() is SYMBOL.
-    # RETURNS:  char
-    def symbol(self) -> chr:
+    # RETURNS:  str (but should return char)
+    def symbol(self) -> str:
         if self.current_token == '<': return '&lt;'
         elif self.current_token == '>': return '&gt;'
         elif self.current_token == '"': return '&quot;'
@@ -142,9 +142,9 @@ class JackTokenizer():
 
     # PURPOSE:  Returns the integer value of the current token. 
     # NOTE: Should be called only when tokenType() is INT_CONST.
-    # RETURNS:  int
-    def intVal(self) -> int:
-        return int(self.current_token)
+    # RETURNS:  str (but should return int)
+    def intVal(self) -> str:
+        return self.current_token
 
 
     # Returns the string value of the currenttoken, without the double quotes.
