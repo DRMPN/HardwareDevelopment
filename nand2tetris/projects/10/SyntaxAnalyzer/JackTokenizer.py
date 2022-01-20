@@ -1,7 +1,6 @@
 import re
 import sys
-from enum import Enum, auto
-
+from enum import Enum
 
 class LexicalElement(Enum):
     KEYWORD = 'keyword'
@@ -135,6 +134,7 @@ class JackTokenizer():
 
     # PURPOSE:  Returns the identifier which is the current token. 
     # NOTE: Should be called onlywhen tokenType() is IDENTIFIER.
+    # FIXME: Should be in the range 0 ... 32767.
     # RETURNS:  string
     def identifier(self) -> str:
         return self.current_token
