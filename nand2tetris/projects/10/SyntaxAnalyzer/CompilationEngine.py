@@ -130,7 +130,7 @@ class CompilationEngine():
     #   advance
     # }
 
-    # PURPOSE:  TODO
+    # PURPOSE:  Compares current token with a passed string.
     # RETURNS:  bool
     def eat(self, string) -> bool:
         return self.JT.current_token == string
@@ -282,31 +282,120 @@ class CompilationEngine():
         self.write(self.compose_non_terminal('statements'))
         self.indent_level += 1
 
-        # while True:
-        # if current_token == 'let'
-        # elif ...
-        # else: break
+        while True:
+            current_token = self.JT.current_token
+            if current_token == 'do': 
+                self.compileDo() 
+                break
+            elif current_token == 'if': 
+                self.compileIf()
+                break
+            elif current_token == 'let': 
+                self.compileLet()
+                break
+            elif current_token == 'return': break
+            elif current_token == 'while': break
+            else: break
 
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/statements'))
     
 
-    # PURPOSE:  Checks whether or not current token is a statement.
-    #           let | if | while | do | return
-    def isStatement(self) -> bool:
-        current_token = self.JT.current_token
-        statements = ['let', 'if', 'while', 'do', 'return']
-        return current_token in statements
+    # # PURPOSE:  Checks whether or not current token is a statement.
+    # #           let | if | while | do | return
+    # def isStatement(self) -> bool:
+    #     current_token = self.JT.current_token
+    #     statements = ['let', 'if', 'while', 'do', 'return']
+    #     return current_token in statements
 
 
-    # compileDo
-    # compileLet
-    # compileWhile
-    # compileReturn
-    # compileIf
+    # PURPOSE:  Compiles a do statement.
+    # do -> subroutineCall -> ;
+    def compileDo(self) -> None: 
+        self.write(self.compose_non_terminal('doStatement'))
+        self.indent_level += 1
+        
+        # do
+        self.write(self.compose_terminal())
+        # subroutineCall
+        self.forward()
+        self.compileTerm()
+        # ;
+        # TODO: forward?
+
+        # end
+        self.indent_level -= 1
+        self.write(self.compose_non_terminal('/doStatement'))
 
 
-    # CompileExpression
-    # CompileTerm
-    # CompileExpressionList
+    # PURPOSE:  Compiles an if statement.
+    # if -> ( -> expression -> ) -> { -> statements -> } -> (else -> { -> statements -> })?
+    def compileIf(self): 
+        self.write(self.compose_non_terminal('ifStatement'))
+        self.indent_level += 1
+
+        # if
+        self.write(self.compose_terminal())
+        # TODO: ...
+
+        # end
+        self.indent_level -= 1
+        self.write(self.compose_non_terminal('/ifStatement'))
+
+
+    # PURPOSE:  Compiles a let statement.
+    # let -> varName -> ([ -> expression -> ])? -> = -> expression -> ;
+    def compileLet(self) -> None: 
+        self.write(self.compose_non_terminal('letStatement'))
+        self.indent_level += 1
+
+        # let
+        self.write(self.compose_terminal())
+        # TODO: ...
+
+        # end
+        self.indent_level -= 1
+        self.write(self.compose_non_terminal('/letStatement'))
+
+
+    # PURPOSE:  Compiles a while statement.
+    # while -> ( -> expression -> ) -> { -> statements -> }
+    def compileWhile(self) -> None: 
+        self.write(self.compose_non_terminal('whileStatement'))
+        self.indent_level += 1
+
+        # let
+        self.write(self.compose_terminal())
+        # TODO: ...
+
+        # end
+        self.indent_level -= 1
+        self.write(self.compose_non_terminal('/whileStatement'))
+
+
+    # PURPOSE:  Compiles a return statement.
+    # return -> expression? -> ;
+    def compileReturn(self) -> None: 
+        self.write(self.compose_non_terminal('returnStatement'))
+        self.indent_level += 1
+
+        # let
+        self.write(self.compose_terminal())
+        # TODO: ...
+
+        # end
+        self.indent_level -= 1
+        self.write(self.compose_non_terminal('/returnStatement'))
+
+
+
+
+    # compileExpression
+    
+
+    # TODO: ...
+    def compileTerm(self): pass
+
+
+    # compileExpressionList
