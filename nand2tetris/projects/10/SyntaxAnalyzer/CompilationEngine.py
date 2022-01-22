@@ -18,6 +18,11 @@ class CompilationEngine():
     #   3. extend the parser to handle expressions as well
     #   4. test it on the square dance and array test
 
+    # TODO:
+    # think aboyt reducing code redundancy with:
+    #       compose non terminal
+    #       +- level_indent
+
 
     # PURPOSE:  Creates a new compilation engine with the given input and output.
     #           The next routine called must be compileClass().
@@ -245,6 +250,8 @@ class CompilationEngine():
                 self.forward()
             # statements
             self.compileStatements()
+            # }
+            self.write(self.compose_terminal())
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/subroutineBody'))
@@ -285,17 +292,23 @@ class CompilationEngine():
         while True:
             current_token = self.JT.current_token
             if current_token == 'do': 
-                self.compileDo() 
-                break
+                self.compileDo()
+                self.forward()
             elif current_token == 'if': 
                 self.compileIf()
-                break
             elif current_token == 'let': 
                 self.compileLet()
+                self.forward()
+            elif current_token == 'return':
+                self.compileReturn()
+                self.forward()
+            elif current_token == 'while': 
+                self.compileWhile()
+                print("BREAK ON WHILE")
                 break
-            elif current_token == 'return': break
-            elif current_token == 'while': break
-            else: break
+            else: 
+                print("BREAK ON EXHAUST")
+                break
 
         # end
         self.indent_level -= 1
@@ -315,30 +328,97 @@ class CompilationEngine():
     def compileDo(self) -> None: 
         self.write(self.compose_non_terminal('doStatement'))
         self.indent_level += 1
-        
+
         # do
-        self.write(self.compose_terminal())
-        # subroutineCall
-        self.forward()
-        self.compileTerm()
-        # ;
-        # TODO: forward?
+        if self.isKeywordOrIdentifier():
+            self.write(self.compose_terminal())
+            # subroutineCall
+            self.forward()
+            self.compileSubroutineCall()
+            # ;
+            self.forward()
+            if self.eat(';'):
+                self.write(self.compose_terminal())
 
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/doStatement'))
 
 
+    # TODO...
+    # subroutineName -> ( -> expressionList -> )
+    # or
+    # className | varName -> . -> subroutineName -> ( -> expressionList-> )
+    def compileSubroutineCall(self):
+        # subroutineName | className | varName
+        if self.isKeywordOrIdentifier():
+            self.write(self.compose_terminal())
+            # .
+            self.forward()
+            if self.eat('.'):
+                self.write(self.compose_terminal())
+                self.forward()
+            # subroutineName
+            if self.isKeywordOrIdentifier():
+                self.write(self.compose_terminal())
+                # (
+                self.forward()
+                if self.eat('('):
+                    self.write(self.compose_terminal())
+                    # expressionList
+                    self.forward()
+                    self.compileExpressionList()
+                    # )
+                    # NOTE: forward was in expressionList
+                    self.write(self.compose_terminal())
+
+
     # PURPOSE:  Compiles an if statement.
-    # if -> ( -> expression -> ) -> { -> statements -> } -> (else -> { -> statements -> })?
+    # if -> ( -> expression -> ) -> { -> statements -> } -> ( else -> { -> statements -> } )?
+    # FIXME: remove code redundancy
     def compileIf(self): 
         self.write(self.compose_non_terminal('ifStatement'))
         self.indent_level += 1
 
         # if
-        self.write(self.compose_terminal())
-        # TODO: ...
-
+        if self.isKeywordOrIdentifier():
+            self.write(self.compose_terminal())
+            # (
+            self.forward()
+            if self.eat('('):
+                self.write(self.compose_terminal())
+                # expression
+                self.forward()
+                self.compileExpression()
+                # )
+                self.forward()
+                if self.eat(')'):
+                    self.write(self.compose_terminal())
+                    # {
+                    self.forward()
+                    if self.eat('{'):
+                        self.write(self.compose_terminal())
+                        # statements
+                        self.forward()
+                        self.compileStatements()
+                        # }
+                        if self.eat('}'):
+                            self.write(self.compose_terminal())
+                        # else
+                        self.forward()
+                        if self.eat('else'):
+                            self.write(self.compose_terminal())
+                            # {
+                            self.forward()
+                            if self.eat('{'):
+                                self.write(self.compose_terminal())
+                                # statements
+                                self.forward()
+                                self.compileStatements()
+                                # }
+                                if self.eat('}'):
+                                    self.write(self.compose_terminal())
+                                    self.forward()
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/ifStatement'))
@@ -352,8 +432,25 @@ class CompilationEngine():
 
         # let
         self.write(self.compose_terminal())
-        # TODO: ...
-
+        # varName
+        self.forward()
+        if self.isKeywordOrIdentifier():
+            self.write(self.compose_terminal())
+            # ([ -> expression -> ])?
+            self.forward()
+            if self.eat('['):
+                # TODO: ...
+                print("TODO: compileLet")
+                # self.forward()
+            # =
+            self.write(self.compose_terminal())
+            # expression
+            self.forward()
+            self.compileExpression()
+            # ;
+            # NOTE: forward
+            self.forward()
+            self.write(self.compose_terminal())
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/letStatement'))
@@ -380,9 +477,18 @@ class CompilationEngine():
         self.write(self.compose_non_terminal('returnStatement'))
         self.indent_level += 1
 
-        # let
+        # return
         self.write(self.compose_terminal())
-        # TODO: ...
+        # expresssion?
+        self.forward()
+
+        # TODO: test with expressions
+        if not self.eat(';'):
+            self.compileExpression()
+            self.forward()
+
+        # ;
+        self.write(self.compose_terminal())
 
         # end
         self.indent_level -= 1
@@ -390,12 +496,53 @@ class CompilationEngine():
 
 
 
+    # PURPOSE:  Compiles and expression.
+    # term -> (op -> term)*
+    def compileExpression(self): 
+        self.write(self.compose_non_terminal('expression'))
+        self.indent_level += 1
 
-    # compileExpression
+        # term
+        self.compileTerm()
+        # TODO: ...
+
+        # end
+        self.indent_level -= 1
+        self.write(self.compose_non_terminal('/expression'))
     
 
-    # TODO: ...
-    def compileTerm(self): pass
+    # PURPOSE: Compiles a term.
+    # integerConstant | stringConstant | keywordConstant | varName | 
+    # varName [ expression ] | subroutineCall | ( expression ) | unaryOp term
+    def compileTerm(self):
+        self.write(self.compose_non_terminal('term'))
+        self.indent_level += 1
+
+        # TODO: ...
+        # NOTE: forward in Let
+        self.write(self.compose_terminal())
+
+        # end
+        self.indent_level -= 1
+        self.write(self.compose_non_terminal('/term'))
 
 
-    # compileExpressionList
+    # PURPOSE:  Compiles a (possibly empty) comma-separated list of expressions.
+    # ( expression -> (, -> expression)* )?
+    def compileExpressionList(self):
+        self.write(self.compose_non_terminal('expressionList'))
+        self.indent_level += 1
+
+        # TODO: test properly
+        # NOTE: forward after finish
+        while not self.eat(')'):
+            # ,
+            if self.eat(','):
+                self.write(self.compose_terminal())
+                self.forward
+            # expressison
+            self.compileExpression()
+        
+        # end
+        self.indent_level -= 1
+        self.write(self.compose_non_terminal('/expressionList'))   
