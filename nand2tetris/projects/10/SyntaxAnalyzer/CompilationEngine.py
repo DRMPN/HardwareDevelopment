@@ -349,6 +349,7 @@ class CompilationEngine():
     # subroutineName -> ( -> expressionList -> )
     # or
     # className | varName -> . -> subroutineName -> ( -> expressionList-> )
+    # TODO reforge
     def compileSubroutineCall(self):
         # subroutineName | className | varName
         if self.isKeywordOrIdentifier():
@@ -358,18 +359,19 @@ class CompilationEngine():
             if self.eat('.'):
                 self.write(self.compose_terminal())
                 self.forward()
-            # subroutineName
-            if self.isKeywordOrIdentifier():
-                self.write(self.compose_terminal())
-                # (
-                self.forward()
-                if self.eat('('):
+                # subroutineName
+                if self.isKeywordOrIdentifier():
                     self.write(self.compose_terminal())
-                    # expressionList
                     self.forward()
-                    self.compileExpressionList()
-                    # )
-                    # NOTE: forward was in expressionList
+            # (
+            if self.eat('('):
+                self.write(self.compose_terminal())
+                # expressionList
+                self.forward()
+                self.compileExpressionList()
+                # )
+                # NOTE: forward was in expressionList
+                if self.eat(')'):
                     self.write(self.compose_terminal())
 
 
@@ -533,16 +535,18 @@ class CompilationEngine():
         self.write(self.compose_non_terminal('expressionList'))
         self.indent_level += 1
 
-        # TODO: test properly
-        # NOTE: forward after finish
-        while not self.eat(')'):
-            # ,
-            if self.eat(','):
-                self.write(self.compose_terminal())
-                self.forward
-            # expressison
-            self.compileExpression()
-        
+        if self.eat(')'):
+            pass
+        else:
+            while not self.eat(')'):
+                # ,
+                if self.eat(','):
+                    self.write(self.compose_terminal())
+                    self.forward()
+                # expressison
+                self.compileExpression()
+                self.forward()
+
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/expressionList'))   
