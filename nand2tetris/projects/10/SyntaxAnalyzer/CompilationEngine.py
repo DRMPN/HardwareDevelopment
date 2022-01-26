@@ -304,10 +304,9 @@ class CompilationEngine():
                 self.forward()
             elif current_token == 'while': 
                 self.compileWhile()
-                print("BREAK ON WHILE")
-                break
-            else: 
-                print("BREAK ON EXHAUST")
+                self.forward()
+            else:
+                #print("BREAK ON EXHAUST")
                 break
 
         # end
@@ -464,9 +463,30 @@ class CompilationEngine():
         self.write(self.compose_non_terminal('whileStatement'))
         self.indent_level += 1
 
-        # let
-        self.write(self.compose_terminal())
-        # TODO: ...
+        # while
+        if self.isKeywordOrIdentifier():
+            self.write(self.compose_terminal())
+            # (
+            self.forward()
+            if self.eat('('):
+                self.write(self.compose_terminal())
+                # expression
+                self.forward()
+                self.compileExpression()
+                # )
+                self.forward()
+                if self.eat(')'):
+                    self.write(self.compose_terminal())
+                    # {
+                    self.forward()
+                    if self.eat('{'):
+                        self.write(self.compose_terminal())
+                        # statements
+                        self.forward()
+                        self.compileStatements()
+                        # }
+                        if self.eat('}'):
+                            self.write(self.compose_terminal())
 
         # end
         self.indent_level -= 1
