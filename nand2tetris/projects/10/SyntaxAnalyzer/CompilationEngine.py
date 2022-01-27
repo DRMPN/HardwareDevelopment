@@ -56,6 +56,12 @@ class CompilationEngine():
         if self.JT.hasMoreTokens(): self.JT.advance()
 
 
+    # PURPOSE:  Backtracks tokenizer by one token.
+    # CHANGES:  JackTokenizer
+    def backward(self) -> None:
+        self.JT.current_token_number -= 1
+
+
     # PURPOSE:  Returns an XML tag for a passed non-terminal element.
     # RETURNS:  str
     def compose_non_terminal(self, word) -> str:
@@ -144,9 +150,43 @@ class CompilationEngine():
     # PURPOSE:  Checks whether or not current token is keyword or identifier.
     #           Currently purpose is: int | char | boolean | className ?
     # RETURNS:  bool
+    # TODO: reforge
     def isKeywordOrIdentifier(self) -> bool:
         token_type = self.JT.tokenType()
         return token_type == LexicalElement.KEYWORD or token_type == LexicalElement.IDENTIFIER
+
+
+    # PURPOSE:  Checks whether or not current token is identifier or not.
+    #           Current target is: className | subroutineName | varName
+    # RETURNS:  bool
+    def isIdentifier(self) -> bool:
+        return self.JT.tokenType() == LexicalElement.IDENTIFIER
+
+
+    # PURPOSE:  Checks whether or not current token is stringConstant or not.
+    # RETURNS:  bool
+    def isStringConstant(self) -> bool:
+        return self.JT.tokenType() == LexicalElement.STRING_CONST
+
+    
+    # PURPOSE:  Checks whether or not current token is integerConstant or not.
+    # RETURNS:  bool
+    def isIntegerConstant(self) -> bool:
+        return self.JT.tokenType() == LexicalElement.INT_CONST
+
+    
+    # PURPOSE:  Checks whether or not current token is op or not.
+    # RETURNS:  bool
+    def isOp(self) -> bool:
+        op = ['+', '-', '*', '/', '&', '|', '<', '>', '=']
+        return self.JT.current_token in op
+
+    
+    # PURPOSE:  Checks whether or not current token is unaryOp or not.
+    # RETURNS:  bool
+    def isUnaryOp(self) -> bool:
+        unaryOp = ['-', '~']
+        return self.JT.current_token in unaryOp
 
 
     # PURPOSE:  Compiles a static declaration or a field declaration.
@@ -440,18 +480,24 @@ class CompilationEngine():
             # ([ -> expression -> ])?
             self.forward()
             if self.eat('['):
-                # TODO: ...
-                print("TODO: compileLet")
-                # self.forward()
+                self.write(self.compose_terminal())
+                # expression
+                self.forward()
+                self.compileExpression()
+                # ]
+                self.forward() # NOTE: clunky backward
+                if self.eat(']'):
+                    self.write(self.compose_terminal())
+                    self.forward()
             # =
             self.write(self.compose_terminal())
             # expression
             self.forward()
             self.compileExpression()
             # ;
-            # NOTE: forward
             self.forward()
             self.write(self.compose_terminal())
+
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/letStatement'))
@@ -510,12 +556,12 @@ class CompilationEngine():
             self.forward()
 
         # ;
+        # NOTE: forward was previously used
         self.write(self.compose_terminal())
 
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/returnStatement'))
-
 
 
     # PURPOSE:  Compiles and expression.
@@ -526,7 +572,13 @@ class CompilationEngine():
 
         # term
         self.compileTerm()
-        # TODO: ...
+        # op
+        if self.isOp():
+            self.forward() # NOTE: clunky backward
+            self.write(self.compose_terminal())
+            # term
+            self.forward()
+            self.compileTerm()
 
         # end
         self.indent_level -= 1
@@ -540,9 +592,37 @@ class CompilationEngine():
         self.write(self.compose_non_terminal('term'))
         self.indent_level += 1
 
-        # TODO: ...
-        # NOTE: forward in Let
-        self.write(self.compose_terminal())
+        # TODO: reforge
+        if self.isKeywordOrIdentifier():
+            self.write(self.compose_terminal())
+            # NOTE: PEEK ONE TOKEN FORWARD
+            self.forward()
+            # .
+            if self.eat('.'):
+                self.write(self.compose_terminal())
+                # subroutineCall
+                self.forward()
+                self.compileSubroutineCall()
+            # [
+            elif self.eat('['):
+                self.write(self.compose_terminal())
+                # expression
+                self.forward()
+                self.compileExpression()
+                # ]
+                self.forward()
+                if self.eat(']'):
+                    self.write(self.compose_terminal())
+            else:
+                self.backward() # NOTE: clunky backward
+        
+        # stringConstant
+        if self.isStringConstant():
+            self.write(self.compose_terminal())
+
+        # integerConstant
+        if self.isIntegerConstant():
+            self.write(self.compose_terminal())
 
         # end
         self.indent_level -= 1
