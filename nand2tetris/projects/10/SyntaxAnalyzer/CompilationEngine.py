@@ -566,18 +566,38 @@ class CompilationEngine():
 
     # PURPOSE:  Compiles and expression.
     # term -> (op -> term)*
+    # BUG: line 45 in Square.jack 
     def compileExpression(self): 
         self.write(self.compose_non_terminal('expression'))
         self.indent_level += 1
 
         # term
         self.compileTerm()
+        
+        # FIXME:    issue with (op -> term)
+        #           0 or more, not 0 or 1
+        #           change to loop? maybe recursion?
+
+        # if (((y + size) < 254) & ((x + size) < 510))
+        # (expression) = ((y + size) < 254) & ((x + size) < 510)
+        #   term = ((y + size) < 254)
+        #       (expression) = ((y + size) < 254)
+        #           term = (y + size)
+        #               (expression) = y + size
+        #                   term = y
+        #                   op = +
+        #                   term = size
+        #           op = <
+        #           term = 254 
+        #           ^^ BUG? ^^      
+
         # op
         if self.isOp():
-            self.forward() # NOTE: clunky backward
             self.write(self.compose_terminal())
+            self.forward() # NOTE: clunky backward
             # term
-            self.forward()
+            if self.isOp():
+                self.forward()
             self.compileTerm()
 
         # end
@@ -586,23 +606,24 @@ class CompilationEngine():
     
 
     # PURPOSE: Compiles a term.
-    # integerConstant | stringConstant | keywordConstant | varName | 
-    # varName [ expression ] | subroutineCall | ( expression ) | unaryOp term
+    # + integerConstant | + stringConstant | + keywordConstant | + varName | 
+    # + varName [ expression ] | + subroutineCall | + ( expression ) | + unaryOp term
     def compileTerm(self):
         self.write(self.compose_non_terminal('term'))
         self.indent_level += 1
 
-        # TODO: reforge
+        # keywordConstant | varName
         if self.isKeywordOrIdentifier():
             self.write(self.compose_terminal())
             # NOTE: PEEK ONE TOKEN FORWARD
             self.forward()
-            # .
+            # subroutineCall
             if self.eat('.'):
                 self.write(self.compose_terminal())
                 # subroutineCall
                 self.forward()
                 self.compileSubroutineCall()
+            # [ expression ]
             # [
             elif self.eat('['):
                 self.write(self.compose_terminal())
@@ -623,6 +644,29 @@ class CompilationEngine():
         # integerConstant
         if self.isIntegerConstant():
             self.write(self.compose_terminal())
+
+        # ( expression )
+        if self.eat('('):
+            self.write(self.compose_terminal())
+            # expression
+            self.forward()
+            self.compileExpression()
+
+# FIXME: bug
+
+            # )
+            if self.eat(')'):
+                self.write(self.compose_terminal())
+            else:
+                self.forward()
+                self.write(self.compose_terminal())
+        
+        # unaryOp term
+        if self.isUnaryOp():
+            self.write(self.compose_terminal())
+            # term
+            self.forward()
+            self.compileTerm()
 
         # end
         self.indent_level -= 1
