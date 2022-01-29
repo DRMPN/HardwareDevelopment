@@ -162,6 +162,12 @@ class CompilationEngine():
     def isIdentifier(self) -> bool:
         return self.JT.tokenType() == LexicalElement.IDENTIFIER
 
+    # PURPOSE:  Checks whether or not current token is keyword or not.
+    #           Current target is: true | false | null | this
+    # RETURNS:  bool
+    def isKeyword(self) -> bool:
+        return self.JT.tokenType() == LexicalElement.KEYWORD
+
 
     # PURPOSE:  Checks whether or not current token is stringConstant or not.
     # RETURNS:  bool
@@ -181,6 +187,7 @@ class CompilationEngine():
         op = ['+', '-', '*', '/', '&', '|', '<', '>', '=']
         return self.JT.current_token in op
 
+    # TODO: reforge to == LexicalElement.SYMBOL ?
     
     # PURPOSE:  Checks whether or not current token is unaryOp or not.
     # RETURNS:  bool
@@ -258,7 +265,7 @@ class CompilationEngine():
         self.write(self.compose_non_terminal('parameterList'))
         self.indent_level += 1
         # type
-        if self.isKeywordOrIdentifier():
+        if self.isKeywordOrIdentifier(): # NOTE: changed from isKeywordOrIdentifier
             self.write(self.compose_terminal())
             # varName
             self.forward()
@@ -306,11 +313,11 @@ class CompilationEngine():
         self.write(self.compose_terminal())
         # type
         self.forward()
-        if self.isKeywordOrIdentifier():
+        if self.isKeywordOrIdentifier(): # NOTE: changed from isKeywordOrIdentifier
             self.write(self.compose_terminal())
             # varName
             self.forward()
-            if self.isKeywordOrIdentifier():
+            if self.isIdentifier(): # NOTE: changed from isKeywordOrIdentifier
                 self.write(self.compose_terminal())
                 # (, -> varName)*
                 self.forward()
@@ -325,6 +332,7 @@ class CompilationEngine():
     
     # PURPOSE:  Compiles a sequence of statements, not including theenclosing {}.
     # statement*
+    # NOTE: reforge
     def compileStatements(self) -> None:
         self.write(self.compose_non_terminal('statements'))
         self.indent_level += 1
@@ -354,14 +362,6 @@ class CompilationEngine():
         self.write(self.compose_non_terminal('/statements'))
     
 
-    # # PURPOSE:  Checks whether or not current token is a statement.
-    # #           let | if | while | do | return
-    # def isStatement(self) -> bool:
-    #     current_token = self.JT.current_token
-    #     statements = ['let', 'if', 'while', 'do', 'return']
-    #     return current_token in statements
-
-
     # PURPOSE:  Compiles a do statement.
     # do -> subroutineCall -> ;
     def compileDo(self) -> None: 
@@ -369,7 +369,7 @@ class CompilationEngine():
         self.indent_level += 1
 
         # do
-        if self.isKeywordOrIdentifier():
+        if self.isKeyword(): # NOTE: changed from isKeywordOrIdentifier
             self.write(self.compose_terminal())
             # subroutineCall
             self.forward()
@@ -384,14 +384,13 @@ class CompilationEngine():
         self.write(self.compose_non_terminal('/doStatement'))
 
 
-    # TODO...
+    # PURPOSE: Compiles a subroutine call.
     # subroutineName -> ( -> expressionList -> )
     # or
     # className | varName -> . -> subroutineName -> ( -> expressionList-> )
-    # TODO reforge
-    def compileSubroutineCall(self):
+    def compileSubroutineCall(self) -> None:
         # subroutineName | className | varName
-        if self.isKeywordOrIdentifier():
+        if self.isIdentifier(): # NOTE: changed from isKeywordOrIdentifier
             self.write(self.compose_terminal())
             # .
             self.forward()
@@ -399,7 +398,7 @@ class CompilationEngine():
                 self.write(self.compose_terminal())
                 self.forward()
                 # subroutineName
-                if self.isKeywordOrIdentifier():
+                if self.isIdentifier(): # NOTE: changed from isKeywordOrIdentifier
                     self.write(self.compose_terminal())
                     self.forward()
             # (
@@ -417,12 +416,12 @@ class CompilationEngine():
     # PURPOSE:  Compiles an if statement.
     # if -> ( -> expression -> ) -> { -> statements -> } -> ( else -> { -> statements -> } )?
     # FIXME: remove code redundancy
-    def compileIf(self): 
+    def compileIf(self) -> None: 
         self.write(self.compose_non_terminal('ifStatement'))
         self.indent_level += 1
 
         # if
-        if self.isKeywordOrIdentifier():
+        if self.isKeyword(): # NOTE: changed from isKeywordOrIdentifier
             self.write(self.compose_terminal())
             # (
             self.forward()
@@ -432,7 +431,7 @@ class CompilationEngine():
                 self.forward()
                 self.compileExpression()
                 # )
-                self.forward()
+                # NOTE: forward was in compileExpression
                 if self.eat(')'):
                     self.write(self.compose_terminal())
                     # {
@@ -475,7 +474,7 @@ class CompilationEngine():
         self.write(self.compose_terminal())
         # varName
         self.forward()
-        if self.isKeywordOrIdentifier():
+        if self.isIdentifier(): # NOTE: changed from isKeywordOrIdentifier
             self.write(self.compose_terminal())
             # ([ -> expression -> ])?
             self.forward()
@@ -485,18 +484,19 @@ class CompilationEngine():
                 self.forward()
                 self.compileExpression()
                 # ]
-                self.forward() # NOTE: clunky backward
+                # NOTE: forward was in compileExpression
                 if self.eat(']'):
                     self.write(self.compose_terminal())
                     self.forward()
             # =
-            self.write(self.compose_terminal())
-            # expression
-            self.forward()
-            self.compileExpression()
-            # ;
-            self.forward()
-            self.write(self.compose_terminal())
+            if self.eat('='):
+                self.write(self.compose_terminal())
+                # expression
+                self.forward()
+                self.compileExpression()
+                # ;
+                if self.eat(';'):
+                    self.write(self.compose_terminal())
 
         # end
         self.indent_level -= 1
@@ -510,7 +510,7 @@ class CompilationEngine():
         self.indent_level += 1
 
         # while
-        if self.isKeywordOrIdentifier():
+        if self.isKeyword(): # NOTE: changed from isKeywordOrIdentifier
             self.write(self.compose_terminal())
             # (
             self.forward()
@@ -520,7 +520,7 @@ class CompilationEngine():
                 self.forward()
                 self.compileExpression()
                 # )
-                self.forward()
+                # NOTE: forward was in compileExpression
                 if self.eat(')'):
                     self.write(self.compose_terminal())
                     # {
@@ -549,55 +549,31 @@ class CompilationEngine():
         self.write(self.compose_terminal())
         # expresssion?
         self.forward()
-
-        # TODO: test with expressions
         if not self.eat(';'):
             self.compileExpression()
-            self.forward()
-
         # ;
-        # NOTE: forward was previously used
-        self.write(self.compose_terminal())
+        # NOTE: forward was in compileExpression
+        if self.eat(';'):
+            self.write(self.compose_terminal())
 
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/returnStatement'))
 
 
-    # PURPOSE:  Compiles and expression.
+    # PURPOSE:  Compiles an expression.
     # term -> (op -> term)*
-    # BUG: line 45 in Square.jack 
-    def compileExpression(self): 
+    def compileExpression(self) -> None:
         self.write(self.compose_non_terminal('expression'))
         self.indent_level += 1
-
+        
         # term
         self.compileTerm()
-        
-        # FIXME:    issue with (op -> term)
-        #           0 or more, not 0 or 1
-        #           change to loop? maybe recursion?
-
-        # if (((y + size) < 254) & ((x + size) < 510))
-        # (expression) = ((y + size) < 254) & ((x + size) < 510)
-        #   term = ((y + size) < 254)
-        #       (expression) = ((y + size) < 254)
-        #           term = (y + size)
-        #               (expression) = y + size
-        #                   term = y
-        #                   op = +
-        #                   term = size
-        #           op = <
-        #           term = 254 
-        #           ^^ BUG? ^^      
-
-        # op
-        if self.isOp():
+        # op*
+        while self.isOp():
             self.write(self.compose_terminal())
-            self.forward() # NOTE: clunky backward
             # term
-            if self.isOp():
-                self.forward()
+            self.forward()
             self.compileTerm()
 
         # end
@@ -606,90 +582,89 @@ class CompilationEngine():
     
 
     # PURPOSE: Compiles a term.
-    # + integerConstant | + stringConstant | + keywordConstant | + varName | 
-    # + varName [ expression ] | + subroutineCall | + ( expression ) | + unaryOp term
-    def compileTerm(self):
+    # + integerConstant | + stringConstant | + keywordConstant | 
+    # + varName | + varName [ expression ] | + varName . subroutineCall | 
+    # + ( expression ) | + unaryOp term
+    def compileTerm(self) -> None:
         self.write(self.compose_non_terminal('term'))
         self.indent_level += 1
 
-        # keywordConstant | varName
-        if self.isKeywordOrIdentifier():
+        # varName
+        if self.isIdentifier():
             self.write(self.compose_terminal())
-            # NOTE: PEEK ONE TOKEN FORWARD
             self.forward()
-            # subroutineCall
+            # . subroutineCall
             if self.eat('.'):
                 self.write(self.compose_terminal())
                 # subroutineCall
                 self.forward()
                 self.compileSubroutineCall()
+                self.forward()
             # [ expression ]
-            # [
-            elif self.eat('['):
+            if self.eat('['):
                 self.write(self.compose_terminal())
                 # expression
                 self.forward()
                 self.compileExpression()
                 # ]
-                self.forward()
+                # NOTE: forward was in compileExpression
                 if self.eat(']'):
                     self.write(self.compose_terminal())
-            else:
-                self.backward() # NOTE: clunky backward
-        
-        # stringConstant
-        if self.isStringConstant():
-            self.write(self.compose_terminal())
-
-        # integerConstant
-        if self.isIntegerConstant():
-            self.write(self.compose_terminal())
+                    self.forward()
 
         # ( expression )
-        if self.eat('('):
+        elif self.eat('('):
             self.write(self.compose_terminal())
             # expression
             self.forward()
             self.compileExpression()
-
-# FIXME: bug
-
             # )
+            # NOTE: forward was in compileExpression
             if self.eat(')'):
                 self.write(self.compose_terminal())
-            else:
                 self.forward()
-                self.write(self.compose_terminal())
         
         # unaryOp term
-        if self.isUnaryOp():
+        elif self.isUnaryOp():
             self.write(self.compose_terminal())
             # term
             self.forward()
             self.compileTerm()
+            # NOTE: forward?
 
-        # end
+        # stringConstant
+        elif self.isStringConstant():
+            self.write(self.compose_terminal())
+            self.forward()
+
+        # integerConstant
+        elif self.isIntegerConstant():
+            self.write(self.compose_terminal())
+            self.forward()
+
+        # keywordConstant
+        elif self.isKeyword():
+            self.write(self.compose_terminal())
+            self.forward()
+
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/term'))
 
 
     # PURPOSE:  Compiles a (possibly empty) comma-separated list of expressions.
     # ( expression -> (, -> expression)* )?
-    def compileExpressionList(self):
+    def compileExpressionList(self) -> None:
         self.write(self.compose_non_terminal('expressionList'))
         self.indent_level += 1
 
-        if self.eat(')'):
-            pass
-        else:
-            while not self.eat(')'):
-                # ,
-                if self.eat(','):
-                    self.write(self.compose_terminal())
-                    self.forward()
-                # expressison
-                self.compileExpression()
+        while not self.eat(')'):
+            # ,
+            if self.eat(','):
+                self.write(self.compose_terminal())
                 self.forward()
+            # expressison
+            self.compileExpression()
+            # NOTE: forward was in compileExpression
 
         # end
         self.indent_level -= 1
