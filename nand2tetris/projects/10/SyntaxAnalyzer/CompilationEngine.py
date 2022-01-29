@@ -12,16 +12,34 @@ from JackTokenizer import *
 class CompilationEngine():
     
 
-    # TODO:
-    #   1. handle everything except expressions
-    #   2. test it on the expressionless Square Dance
-    #   3. extend the parser to handle expressions as well
-    #   4. test it on the square dance and array test
-
-    # TODO:
-    # think aboyt reducing code redundancy with:
+    # 1. TODO:
+    # think about reducing code redundancy with:
     #       compose non terminal
     #       +- level_indent
+    # NOTE:
+    # use decorator
+    #       function compile_something -> write <something> ... etc
+    #       or regex compileSomething  -> write <something> ... etc
+
+
+    # 2. TODO:
+    # refactor: self.forward()
+    #           self.write(self.compose_terminal())
+    # into one function
+    # NOTE: 
+    # all compile functions should call self.forward() at the end 
+
+
+    # 3. TODO:
+    # maybe reforge isOp and isUnaryOp with ... == LexicalElement.SYMBOL ?
+
+
+    # 4.TODO:
+    # maybe eat(something) ->
+    #       if something ->
+    #           write -> forward
+    #       else ->
+    #           sys.exit("PARSE ERROR")
 
 
     # PURPOSE:  Creates a new compilation engine with the given input and output.
@@ -35,6 +53,7 @@ class CompilationEngine():
         try: self.out_file = open(output_path, 'w')
         except OSError: sys.exit(f'Unable to create {output_path}')
 
+        # TODO: comment
         self.forward()
 
     
@@ -54,12 +73,6 @@ class CompilationEngine():
     # CHANGES:  JackTokenizer
     def forward(self) -> None:
         if self.JT.hasMoreTokens(): self.JT.advance()
-
-
-    # PURPOSE:  Backtracks tokenizer by one token.
-    # CHANGES:  JackTokenizer
-    def backward(self) -> None:
-        self.JT.current_token_number -= 1
 
 
     # PURPOSE:  Returns an XML tag for a passed non-terminal element.
@@ -88,59 +101,6 @@ class CompilationEngine():
         elif token_type == LexicalElement.STRING_CONST: return self.JT.stringVal()
 
 
-    #   while ( expression ) { statements }
-    #      eat while -> code to handle 'while'
-    #      eat (
-    #      compileexpression()
-    #      eat )
-    #      eat {
-    #      compile statements
-    #      eat }
-
-
-    # PURPOSE:  Compiles a complete class.
-    # ASSUMES:  Already has a token to start with.
-    # class -> className -> { -> classVarDec* -> subroutineDec* -> }
-    def compileClass(self) -> None:
-        # class
-        if self.eat('class'):
-            self.write(self.compose_non_terminal('class'))
-            self.indent_level += 1
-            self.write(self.compose_terminal())
-            # className
-            self.forward()
-            self.write(self.compose_terminal())
-            # {
-            self.forward()
-            if self.eat('{'):
-                self.write(self.compose_terminal())
-
-                # TODO: test this block of code properly, but should work as expected
-                # classVarDec*
-                self.forward()
-                while self.eat('static') or self.eat('field'):
-                    self.compileClassVarDec()
-                    self.forward()
-                # subroutineDec*
-                while self.eat('constructor') or self.eat('function') or self.eat('method'):
-                    self.compileSubroutine()
-                    self.forward()
-
-                # }
-                if self.eat('}'):
-                    self.write(self.compose_terminal())
-                    # end
-                    self.indent_level -= 1
-                    self.write(self.compose_non_terminal('/class'))
-
-
-    # eat(string) {
-    # if currentToken != string
-    #   error
-    # else
-    #   advance
-    # }
-
     # PURPOSE:  Compares current token with a passed string.
     # RETURNS:  bool
     def eat(self, string) -> bool:
@@ -150,7 +110,6 @@ class CompilationEngine():
     # PURPOSE:  Checks whether or not current token is keyword or identifier.
     #           Currently purpose is: int | char | boolean | className ?
     # RETURNS:  bool
-    # TODO: reforge
     def isKeywordOrIdentifier(self) -> bool:
         token_type = self.JT.tokenType()
         return token_type == LexicalElement.KEYWORD or token_type == LexicalElement.IDENTIFIER
@@ -187,37 +146,74 @@ class CompilationEngine():
         op = ['+', '-', '*', '/', '&', '|', '<', '>', '=']
         return self.JT.current_token in op
 
-    # TODO: reforge to == LexicalElement.SYMBOL ?
     
     # PURPOSE:  Checks whether or not current token is unaryOp or not.
     # RETURNS:  bool
     def isUnaryOp(self) -> bool:
         unaryOp = ['-', '~']
         return self.JT.current_token in unaryOp
+    
+
+    # PURPOSE:  Compiles a complete class.
+    # ASSUMES:  Already has a token to start with.
+    # class -> className -> { -> classVarDec* -> subroutineDec* -> }
+    # TODO: change to isKeyword?
+    def compileClass(self) -> None:
+        self.write(self.compose_non_terminal('class'))
+        self.indent_level += 1
+
+        # class
+        if self.eat('class'):
+            self.write(self.compose_terminal())
+            # className
+            self.forward()
+            if self.isIdentifier():
+                self.write(self.compose_terminal())
+                # {
+                self.forward()
+                if self.eat('{'):
+                    self.write(self.compose_terminal())
+                    # classVarDec*
+                    self.forward()
+                    while self.eat('static') or self.eat('field'):
+                        self.compileClassVarDec()
+                        self.forward()
+                    # subroutineDec*
+                    while self.eat('constructor') or self.eat('function') or self.eat('method'):
+                        self.compileSubroutine()
+                        self.forward()
+                    # }
+                    if self.eat('}'):
+                        self.write(self.compose_terminal())
+                        
+        # end
+        self.indent_level -= 1
+        self.write(self.compose_non_terminal('/class'))
 
 
     # PURPOSE:  Compiles a static declaration or a field declaration.
     # static | field -> type -> varName -> (, -> varName )* -> ;
     def compileClassVarDec(self) -> None:
-        # static | field
-        # previously done
         self.write(self.compose_non_terminal('classVarDec'))
         self.indent_level += 1
+        
+        # static | field
+        # NOTE: previously checked
         self.write(self.compose_terminal())
         # type
         self.forward()
-        self.write(self.compose_terminal())
-        # varName
-        self.forward()
-        self.write(self.compose_terminal())
-
-        # (, -> varName )*
-        # TODO: test this block of code properly, but should work as expected
-        self.forward()
-        self.write(self.compose_terminal())
-        while not(self.eat(';')):
-            self.forward()
+        if self.isKeywordOrIdentifier():
             self.write(self.compose_terminal())
+            # varName
+            self.forward()
+            if self.isIdentifier():
+                self.write(self.compose_terminal())
+                # (, -> varName )*
+                self.forward()
+                self.write(self.compose_terminal())
+                while not(self.eat(';')):
+                    self.forward()
+                    self.write(self.compose_terminal())
 
         # end
         self.indent_level -= 1
@@ -227,33 +223,34 @@ class CompilationEngine():
     # PURPOSE:  Compiles a complete method, function, or constructor.
     # constructor | function | method -> void | type -> subroutineName -> ( -> parameterList -> ) -> subroutineBody
     def compileSubroutine(self) -> None:
-        # constructor | function | method
-        # previously done
         self.write(self.compose_non_terminal('subroutineDec'))
         self.indent_level += 1
-        self.write(self.compose_terminal())
         
+        # constructor | function | method
+        # NOTE: previously checked
+        self.write(self.compose_terminal())
         # void | type
         self.forward()
-        # TODO: type check
-        if self.eat('void') or True: 
+        if self.isKeywordOrIdentifier(): 
             self.write(self.compose_terminal())
             # subroutineName
             self.forward()
-            self.write(self.compose_terminal())
-            # (
-            self.forward()
-            if self.eat('('):
-                self.write(self.compose_terminal())  
-                # parameterList
+            if self.isIdentifier():
+                self.write(self.compose_terminal())
+                # (
                 self.forward()
-                self.compileParameterList()
-                # )
-                if self.eat(')'):
-                    self.write(self.compose_terminal())
-                    # subroutineBody
+                if self.eat('('):
+                    self.write(self.compose_terminal())  
+                    # parameterList
                     self.forward()
-                    self.compileSubroutineBody()
+                    self.compileParameterList()
+                    # )
+                    if self.eat(')'):
+                        self.write(self.compose_terminal())
+                        # subroutineBody
+                        self.forward()
+                        self.compileSubroutineBody()
+
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/subroutineDec'))
@@ -264,19 +261,19 @@ class CompilationEngine():
     def compileParameterList(self) -> None:
         self.write(self.compose_non_terminal('parameterList'))
         self.indent_level += 1
+
         # type
-        if self.isKeywordOrIdentifier(): # NOTE: changed from isKeywordOrIdentifier
+        if self.isKeywordOrIdentifier():
             self.write(self.compose_terminal())
             # varName
             self.forward()
             self.write(self.compose_terminal())
-
-            # NOTE: should work as expected
             # (, -> varName)*
             self.forward()
             while not self.eat(')'):
                 self.write(self.compose_terminal())
                 self.forward()
+
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/parameterList'))
@@ -287,6 +284,7 @@ class CompilationEngine():
     def compileSubroutineBody(self) -> None:
         self.write(self.compose_non_terminal('subroutineBody'))
         self.indent_level += 1
+
         # {
         if self.eat('{'):
             self.write(self.compose_terminal())
@@ -299,6 +297,7 @@ class CompilationEngine():
             self.compileStatements()
             # }
             self.write(self.compose_terminal())
+
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/subroutineBody'))
@@ -309,15 +308,16 @@ class CompilationEngine():
     def compileVarDec(self) -> None:
         self.write(self.compose_non_terminal('varDec'))
         self.indent_level += 1
+
         # var
         self.write(self.compose_terminal())
         # type
         self.forward()
-        if self.isKeywordOrIdentifier(): # NOTE: changed from isKeywordOrIdentifier
+        if self.isKeywordOrIdentifier():
             self.write(self.compose_terminal())
             # varName
             self.forward()
-            if self.isIdentifier(): # NOTE: changed from isKeywordOrIdentifier
+            if self.isIdentifier():
                 self.write(self.compose_terminal())
                 # (, -> varName)*
                 self.forward()
@@ -325,6 +325,7 @@ class CompilationEngine():
                 while not(self.eat(';')):
                     self.forward()
                     self.write(self.compose_terminal())
+
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/varDec'))
@@ -369,15 +370,16 @@ class CompilationEngine():
         self.indent_level += 1
 
         # do
-        if self.isKeyword(): # NOTE: changed from isKeywordOrIdentifier
+        # NOTE: previously checked
+        self.write(self.compose_terminal())
+        # subroutineCall
+        self.forward()
+        # TODO: check?
+        self.compileSubroutineCall()
+        # ;
+        self.forward()
+        if self.eat(';'):
             self.write(self.compose_terminal())
-            # subroutineCall
-            self.forward()
-            self.compileSubroutineCall()
-            # ;
-            self.forward()
-            if self.eat(';'):
-                self.write(self.compose_terminal())
 
         # end
         self.indent_level -= 1
@@ -390,7 +392,7 @@ class CompilationEngine():
     # className | varName -> . -> subroutineName -> ( -> expressionList-> )
     def compileSubroutineCall(self) -> None:
         # subroutineName | className | varName
-        if self.isIdentifier(): # NOTE: changed from isKeywordOrIdentifier
+        if self.isIdentifier():
             self.write(self.compose_terminal())
             # .
             self.forward()
@@ -398,7 +400,7 @@ class CompilationEngine():
                 self.write(self.compose_terminal())
                 self.forward()
                 # subroutineName
-                if self.isIdentifier(): # NOTE: changed from isKeywordOrIdentifier
+                if self.isIdentifier():
                     self.write(self.compose_terminal())
                     self.forward()
             # (
@@ -421,44 +423,44 @@ class CompilationEngine():
         self.indent_level += 1
 
         # if
-        if self.isKeyword(): # NOTE: changed from isKeywordOrIdentifier
+        # NOTE: previously checked
+        self.write(self.compose_terminal())
+        # (
+        self.forward()
+        if self.eat('('):
             self.write(self.compose_terminal())
-            # (
+            # expression
             self.forward()
-            if self.eat('('):
+            self.compileExpression()
+            # )
+            # NOTE: forward was in compileExpression
+            if self.eat(')'):
                 self.write(self.compose_terminal())
-                # expression
+                # {
                 self.forward()
-                self.compileExpression()
-                # )
-                # NOTE: forward was in compileExpression
-                if self.eat(')'):
+                if self.eat('{'):
                     self.write(self.compose_terminal())
-                    # {
+                    # statements
                     self.forward()
-                    if self.eat('{'):
+                    self.compileStatements()
+                    # }
+                    if self.eat('}'):
                         self.write(self.compose_terminal())
-                        # statements
+                    # else
+                    self.forward()
+                    if self.eat('else'):
+                        self.write(self.compose_terminal())
+                        # {
                         self.forward()
-                        self.compileStatements()
-                        # }
-                        if self.eat('}'):
+                        if self.eat('{'):
                             self.write(self.compose_terminal())
-                        # else
-                        self.forward()
-                        if self.eat('else'):
-                            self.write(self.compose_terminal())
-                            # {
+                            # statements
                             self.forward()
-                            if self.eat('{'):
+                            self.compileStatements()
+                            # }
+                            if self.eat('}'):
                                 self.write(self.compose_terminal())
-                                # statements
                                 self.forward()
-                                self.compileStatements()
-                                # }
-                                if self.eat('}'):
-                                    self.write(self.compose_terminal())
-                                    self.forward()
         # end
         self.indent_level -= 1
         self.write(self.compose_non_terminal('/ifStatement'))
@@ -471,6 +473,7 @@ class CompilationEngine():
         self.indent_level += 1
 
         # let
+        # NOTE: previously checked
         self.write(self.compose_terminal())
         # varName
         self.forward()
@@ -510,29 +513,29 @@ class CompilationEngine():
         self.indent_level += 1
 
         # while
-        if self.isKeyword(): # NOTE: changed from isKeywordOrIdentifier
+        # NOTE: previously checked
+        self.write(self.compose_terminal())
+        # (
+        self.forward()
+        if self.eat('('):
             self.write(self.compose_terminal())
-            # (
+            # expression
             self.forward()
-            if self.eat('('):
+            self.compileExpression()
+            # )
+            # NOTE: forward was in compileExpression
+            if self.eat(')'):
                 self.write(self.compose_terminal())
-                # expression
+                # {
                 self.forward()
-                self.compileExpression()
-                # )
-                # NOTE: forward was in compileExpression
-                if self.eat(')'):
+                if self.eat('{'):
                     self.write(self.compose_terminal())
-                    # {
+                    # statements
                     self.forward()
-                    if self.eat('{'):
+                    self.compileStatements()
+                    # }
+                    if self.eat('}'):
                         self.write(self.compose_terminal())
-                        # statements
-                        self.forward()
-                        self.compileStatements()
-                        # }
-                        if self.eat('}'):
-                            self.write(self.compose_terminal())
 
         # end
         self.indent_level -= 1
@@ -546,6 +549,7 @@ class CompilationEngine():
         self.indent_level += 1
 
         # return
+        # NOTE: previously checked
         self.write(self.compose_terminal())
         # expresssion?
         self.forward()
@@ -585,6 +589,7 @@ class CompilationEngine():
     # + integerConstant | + stringConstant | + keywordConstant | 
     # + varName | + varName [ expression ] | + varName . subroutineCall | 
     # + ( expression ) | + unaryOp term
+    # TODO: remove code redundancy
     def compileTerm(self) -> None:
         self.write(self.compose_non_terminal('term'))
         self.indent_level += 1
