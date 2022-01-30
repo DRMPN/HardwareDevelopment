@@ -35,7 +35,7 @@ def main():
     for in_path in list_of_fps:
         out_path = in_path.split('.')[0] + 'Test.xml' # TODO: change to .xml
         CM = CompilationEngine(in_path, out_path)
-        CM.compileClass()
+        CM.compile_class()
         CM.dispose() # Close output file
         
         print('DONE') # TODO: remove

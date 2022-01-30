@@ -2,6 +2,7 @@ import re
 import sys
 from enum import Enum
 
+
 class LexicalElement(Enum):
     KEYWORD = 'keyword'
     SYMBOL = 'symbol'
@@ -13,7 +14,6 @@ class LexicalElement(Enum):
 # Removes all comments and white space from the input stream 
 # and breaks it into Jack-language tokens, as specified by the Jack grammar.
 class JackTokenizer():
-
 
     # Opens the input file/stream and gets ready to tokenize it.
     def __init__(self, path) -> None:
