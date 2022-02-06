@@ -3,6 +3,8 @@ import sys
 from CompilationEngine import *
 
 
+# TODO: REWRITE!
+
 # The analyzer program operates on a given source, where source is either a file name
 # of the form Xxx.jack or a directory name containing one or more such files. For
 # each source Xxx.jack file, the analyzer goes through the following logic:
@@ -16,7 +18,7 @@ def main():
 
     # Ensures correct program usage
     if len(sys.argv) != 2:
-        sys.exit("USAGE: \t$ python3 JackAnalyzer.py file.jack\n\t$ python3 JackAnalyzer.py directory")
+        sys.exit("USAGE: \t$ python3 JackCompiler.py file.jack\n\t$ python3 JackCompiler.py directory")
 
 
     list_of_fps = []
@@ -33,10 +35,10 @@ def main():
 
 
     for in_path in list_of_fps:
-        out_path = in_path.split('.')[0] + 'Test.xml' # TODO: change to .xml
+        out_path = in_path.split('.')[0] + 'Test.vm'
         CM = CompilationEngine(in_path, out_path)
         CM.compile_class()
-        CM.dispose() # Close output file
+        #CM.dispose() # Close output file
         
         print('DONE') # TODO: remove
 

@@ -16,6 +16,9 @@ class SymbolTable():
 
     # NOTE: Two separate hash tables: one for the class scope and
     #       another one for the sub-routine scope.
+
+    # TODO: think about enum?
+    # TODO: change symbol table arg to argument? var to local?
     
     # PURPOSE: Creates a new empty symbol table.
     def __init__(self) -> None:
