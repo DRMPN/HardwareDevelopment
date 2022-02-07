@@ -50,7 +50,7 @@ class VMWriter():
         # TODO: sub or not?
 
         elif command == '-':
-            self._write_command('sub')
+            self._write_command('neg')
         elif command == '=':
             self._write_command('eq')
         elif command == '>':
