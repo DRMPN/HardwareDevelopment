@@ -43,6 +43,8 @@ def wrap_non_terminal(func) -> None:
 
 class CompilationEngine():
 
+    # TODO: rewrite eat() so if true it gets next token by calling forward()
+
     # PURPOSE:  Creates a new compilation engine with the given input and output.
     #           The next routine called must be compileClass().
     # ASSUMES:  Passed paths are absolute.
@@ -58,15 +60,48 @@ class CompilationEngine():
         self.subrouniteName = None # name of the current compiling subroutine
         self.termName = None # name of the current compiling term
         self.numArgs = 0 # amount of function arguments
-        
-        #try: 
-        #    self.out_file = open(output_path, 'w')
-        #except OSError: 
-        #    sys.exit(f'Unable to create {output_path}')
 
         self.forward() # prepare first token to parse
 
     
+    # PURPOSE: Resets subroutine symbol table and unique names 
+    def reset_subroutine(self) -> None:
+        self.ST.start_subroutine() # NOTE: resets symbol table
+        # TODO: should probably reset after each subroutine compilation 
+        self.uniqueWhile = 0 # num to indicate unique while loop
+        self.uniqueIf = 0 # num to indicate unique if-else statement
+
+
+    # PURPOSE: Writes an op command into an output file.
+    def write_op(self, op: str) -> None:
+        if op == '+':
+            self.VMW.write_arithmetic(AnLCommands.ADD)
+        elif op == '-':
+            self.VMW.write_arithmetic(AnLCommands.SUB)
+        elif op == '*':
+            self.VMW.write_call('Math.multiply', 2)
+        elif op == '/':
+            self.VMW.write_call('Math.divide', 2)
+        elif op == '&':
+            self.VMW.write_arithmetic(AnLCommands.AND)
+        elif op == '|':
+            self.VMW.write_arithmetic(AnLCommands.OR)
+        elif op == '<':
+            self.VMW.write_arithmetic(AnLCommands.LT)
+        elif op == '>':
+            self.VMW.write_arithmetic(AnLCommands.GT)
+        elif op == '=':
+            self.VMW.write_arithmetic(AnLCommands.EQ)
+
+
+    # PURPOSE: Writes a unary op command into an output file.
+    def write_unary_op(self, uOp: str) -> None:
+        if uOp == '-':
+            self.VMW.write_arithmetic(AnLCommands.NEG)
+        elif uOp == '~':
+            self.VMW.write_arithmetic(AnLCommands.NOT)
+
+
     # PURPOSE:  Writes a line into an output file.
     # CHANGES:  file
     def write(self, line) -> None:
@@ -224,7 +259,7 @@ class CompilationEngine():
     def compile_subroutineDec(self) -> None:
         # constructor | function | method # NOTE: previously checked
         # TODO: change behavior for method call
-        self.ST.start_subroutine() # NOTE: resets symbol table
+        self.reset_subroutine() # NOTE: resets sub ST and unique num
         self.forward()
         # void | type
         if self.isKeywordOrIdentifier(): 
@@ -321,15 +356,12 @@ class CompilationEngine():
             if self.eat('do'): 
                 self.compile_doStatement()
             elif self.eat('if'): 
-                print("IF")
                 self.compile_ifStatement()
             elif self.eat('let'): 
                 self.compile_letStatement()
             elif self.eat('return'):
                 self.compile_returnStatement()
             elif self.eat('while'):
-                print("WHILE")
-                break
                 self.compile_whileStatement()
             else:
                 break #print("BREAK ON EXHAUST")
@@ -380,51 +412,46 @@ class CompilationEngine():
 
     # PURPOSE:  Compiles an if statement.
     # if -> ( -> expression -> ) -> { -> statements -> } -> ( else -> { -> statements -> } )?
-    # TODO: unique labels
-    # TODO: rules:
-    """
-            compiled (expression)
-            not
-            if-goto L1
-            compiled (statements1)
-            goto L2
-        label L1
-            compiled (statements2)
-        label L2
-            ...
-    """
-    #@wrap_non_terminal
     def compile_ifStatement(self) -> None: 
         # if # NOTE: previously checked
-        # TODO: negate according to rules
-        self.write_terminal()
+        L1 = f'IF_TRUE{self.uniqueIf}'
+        L2 = f'IF_FALSE{self.uniqueIf}'
+        L3 = f'IF_END{self.uniqueIf}'
+        self.uniqueIf += 1
+        self.forward()
         # (
         if self.eat('('):
-            self.write_terminal()
+            self.forward()
             # expression
             self.compile_expression()
+            self.VMW.write_if(L1) # goto if
+            self.VMW.write_goto(L2) # goto else
             # )
             if self.eat(')'):
-                self.write_terminal()
+                self.forward()
                 # {
                 if self.eat('{'):
-                    self.write_terminal()
+                    self.VMW.write_label(L1) # if
+                    self.forward()
                     # statements
                     self.compile_statements()
                     # }
                     if self.eat('}'):
-                        self.write_terminal()
+                        self.forward()
+                    self.VMW.write_goto(L3) # goto end
                     # else
                     if self.eat('else'):
-                        self.write_terminal()
+                        self.VMW.write_label(L2) # else
+                        self.forward()
                         # {
                         if self.eat('{'):
-                            self.write_terminal()
+                            self.forward()
                             # statements
                             self.compile_statements()
                             # }
                             if self.eat('}'):
-                                self.write_terminal()
+                                self.forward()
+                    self.VMW.write_label(L3) # end
 
 
     # PURPOSE:  Compiles a let statement.
@@ -463,55 +490,49 @@ class CompilationEngine():
     
     # PURPOSE:  Compiles a return statement.
     # return -> expression? -> ;
-    #@wrap_non_terminal
     def compile_returnStatement(self) -> None: 
         # return # NOTE: previously checked
         self.forward()
         # expresssion?
         if not self.eat(';'):
-            self.VMW.write_return()
             self.compile_expression()
         else:
             self.VMW.write_push('constant', 0)
-            self.VMW.write_return()
         # ;
         if self.eat(';'):
+            self.VMW.write_return()
             self.forward()
 
 
     # PURPOSE:  Compiles a while statement.
     # while -> ( -> expression -> ) -> { -> statements -> }
-    # TODO: unique labels
-    # TODO: negate not according to rules:
-    """
-        label L1
-            compiled (expresison)
-            not
-            if-goto L2
-            compiled (statements)
-            goto L1
-        label L2
-        ...
-    """
     def compile_whileStatement(self) -> None: 
         # while # NOTE: previously checked
-        self.write_terminal()
+        L1 = f'WHILE_EXP{self.uniqueWhile}'
+        L2 = f'WHILE_END{self.uniqueWhile}'
+        self.uniqueWhile += 1
+        self.VMW.write_label(L1) # label L1
+        self.forward()
         # (
         if self.eat('('):
-            self.write_terminal()
+            self.forward()
             # expression
-            self.compile_expression()
+            self.compile_expression() # compiled expression
+            self.write_unary_op('~') # not
+            self.VMW.write_if(L2) # if-goto L2
             # )
             if self.eat(')'):
-                self.write_terminal()
+                self.forward()
                 # {
                 if self.eat('{'):
-                    self.write_terminal()
+                    self.forward()
                     # statements
-                    self.compile_statements()
+                    self.compile_statements() # compiled statements
+                    self.VMW.write_goto(L1) # goto L1
                     # }
                     if self.eat('}'):
-                        self.write_terminal()
+                        self.VMW.write_label(L2) # label L2
+                        self.forward()
 
 
     # PURPOSE:  Compiles an expression.
@@ -525,18 +546,13 @@ class CompilationEngine():
             self.forward()
             # term
             self.compile_term()
-            # TODO: hardcoded behavior
-            if op == '*':
-                self.VMW.write_call('Math.multiply', 2)
-            else:
-                self.VMW.write_arithmetic(op)
+            self.write_op(op)
     
 
     # PURPOSE: Compiles a term.
     # + integerConstant | + stringConstant | + keywordConstant | 
     # + varName | + varName [ expression ] | + varName . subroutineCall | 
     # + ( expression ) | + unaryOp term
-    #@wrap_non_terminal
     def compile_term(self) -> None:
         # integerConstant
         if self.isIntegerConstant():
@@ -555,7 +571,7 @@ class CompilationEngine():
             # true
             else:
                 self.VMW.write_push('constant', 0)
-                self.VMW.write_arithmetic('~')
+                self.write_unary_op('~')
             self.forward()
         # varName
         elif self.isIdentifier():
@@ -573,7 +589,6 @@ class CompilationEngine():
                 segment = self.ST.kind_of(name).value
                 index = self.ST.index_of(name)
                 self.VMW.write_push(segment, index)
-                # TODO: probably forward is useless
 
             ## TODO: [ expression ]
             #if self.eat('['):
@@ -583,6 +598,7 @@ class CompilationEngine():
             #    # ]
             #    if self.eat(']'):
             #        self.write_terminal()
+
         # ( expression )
         elif self.eat('('):
             self.forward()
@@ -597,12 +613,12 @@ class CompilationEngine():
             self.forward()
             # term
             self.compile_term()
-            self.VMW.write_arithmetic(unaryOp)
+            # NOTE: neg or not
+            self.write_unary_op(unaryOp)
 
 
     # PURPOSE:  Compiles a (possibly empty) comma-separated list of expressions.
     # ( expression -> (, -> expression)* )?
-    #@wrap_non_terminal
     def compile_expressionList(self) -> None:
         self.numArgs = 0
         while not self.eat(')'):
