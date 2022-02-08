@@ -180,17 +180,15 @@ class CompilationEngine():
     def compile_class(self) -> None:
         # class
         if self.eat('class'):
-            #self.write_terminal()
             self.forward()
             # className
             if self.isIdentifier():
-                #self.write_terminal()
                 self.className = self.JT.current_token
                 self.forward()
                 # {
                 if self.eat('{'):
-                    #self.write_terminal()
                     self.forward()
+
                     ## TODO: classVarDec*
                     #while self.eat('static') or self.eat('field'):
                     #    self.compile_classVarDec()
@@ -200,7 +198,6 @@ class CompilationEngine():
                         self.compile_subroutineDec()
                     if self.eat('}'):
                         self.forward()
-                        #self.write_terminal()
 
 
     # PURPOSE:  Compiles a static declaration or a field declaration.
@@ -226,28 +223,24 @@ class CompilationEngine():
     #@wrap_non_terminal
     def compile_subroutineDec(self) -> None:
         # constructor | function | method # NOTE: previously checked
-        # self.write_terminal()
+        # TODO: change behavior for method call
         self.ST.start_subroutine() # NOTE: resets symbol table
         self.forward()
         # void | type
         if self.isKeywordOrIdentifier(): 
-            #self.write_terminal()
             # NOTE: TODO: void etc
             self.forward()
             # subroutineName
             if self.isIdentifier():
-                #self.write_terminal()
                 self.subrouniteName = self.JT.current_token
                 self.forward()
                 # (
                 if self.eat('('):
-                    #self.write_terminal()
                     self.forward()
                     # parameterList
                     self.compile_parameterList()
                     # )
                     if self.eat(')'):
-                        #self.write_terminal()
                         self.forward()
                         # subroutineBody
                         self.compile_subroutineBody()
@@ -255,20 +248,14 @@ class CompilationEngine():
 
     # PURPOSE:  Compiles a possibly empty parameter list, not including the enclosing ().
     # type -> varName -> (, -> varName)*
-    #@wrap_non_terminal
     def compile_parameterList(self) -> None:
         # type
         if self.isKeywordOrIdentifier():
             type_ = self.JT.current_token
-            #self.write_terminal()
             self.forward()
             # varName
-            #self.write_terminal()
             name = self.JT.current_token
-
-            # TODO: arg in kind
-
-            kind = 'arg'
+            kind = STKind.ARG
             self.ST.define(name, type_, kind)
             self.forward()
             # (, -> varName)*
@@ -276,7 +263,6 @@ class CompilationEngine():
                 if self.isIdentifier():
                     name = self.JT.current_token
                     self.ST.define(name, type_, kind)
-                #self.write_terminal()
                 self.forward()
 
 
@@ -286,17 +272,15 @@ class CompilationEngine():
     def compile_subroutineBody(self) -> None:
         # {
         if self.eat('{'):
-            #self.write_terminal()
             self.forward()
             # varDec*
             while self.eat('var'):
                 self.compile_varDec()
-            self.VMW.write_function(f'{self.className}.{self.subrouniteName}', self.ST.var_count('var'))
+            self.VMW.write_function(f'{self.className}.{self.subrouniteName}', self.ST.var_count(STKind.VAR))
             # statements
             self.compile_statements()
             # }
             if self.eat('}'):
-                #self.write_terminal()
                 self.forward()
 
 
@@ -306,18 +290,15 @@ class CompilationEngine():
     def compile_varDec(self) -> None:
         # var
         if self.eat('var'):
-            #self.write_terminal()
-            kind = self.JT.current_token
+            kind = STKind.VAR
             self.forward()
             # type
             if self.isKeywordOrIdentifier():
                 type_ = self.JT.current_token
-                #self.write_terminal()
                 self.forward()
                 # varName
                 if self.isIdentifier():
                     name = self.JT.current_token
-                    #self.write_terminal()
                     self.ST.define(name, type_, kind)
                     self.forward()
                     # (, -> varName)*
@@ -326,10 +307,8 @@ class CompilationEngine():
                             name = self.JT.current_token
                             self.ST.define(name, type_, kind)
                         self.forward()
-                        #self.write_terminal()
                     # ;
                     if self.eat(';'):
-                        #self.write_terminal()
                         self.forward()
     
     
@@ -350,6 +329,7 @@ class CompilationEngine():
                 self.compile_returnStatement()
             elif self.eat('while'):
                 print("WHILE")
+                break
                 self.compile_whileStatement()
             else:
                 break #print("BREAK ON EXHAUST")
@@ -360,7 +340,6 @@ class CompilationEngine():
     #@wrap_non_terminal
     def compile_doStatement(self) -> None: 
         # do # NOTE: previously checked
-        #self.write_terminal()
         self.forward()
         # subroutineCall
         if self.isIdentifier():
@@ -368,7 +347,7 @@ class CompilationEngine():
             self.compile_subroutineCall()
             # ;
             if self.eat(';'):
-                #self.write_terminal()
+                # TODO: temp cuz 0 in stack?
                 self.VMW.write_pop('temp', 0)
                 self.forward()
 
@@ -379,29 +358,22 @@ class CompilationEngine():
     # className | varName -> . -> subroutineName -> ( -> expressionList-> )
     def compile_subroutineCall(self) -> None:
         # subroutineName | className | varName # NOTE: previously checked
-        # self.write_terminal()
         self.termName += self.JT.current_token
         self.forward()
         # .
         if self.eat('.'):
-            #self.write_terminal()
             self.termName += self.JT.current_token
             self.forward()
             # subroutineName
             if self.isIdentifier():
-                #self.write_terminal()
                 self.termName += self.JT.current_token
                 self.forward()
         # (
         if self.eat('('):
-            # self.write_terminal()
             self.forward()
-            # TODO: expressionList
             self.compile_expressionList()
             # )
             if self.eat(')'):
-                #self.write_terminal()
-                # TODO: do something with name
                 self.VMW.write_call(self.termName, self.numArgs)
                 self.forward()
 
@@ -458,15 +430,17 @@ class CompilationEngine():
     # PURPOSE:  Compiles a let statement.
     # let -> varName -> ([ -> expression -> ])? -> = -> expression -> ;
     #@wrap_non_terminal
+
+    # TODO: look up each variable in symbol table, if not found, throw an error
+
     def compile_letStatement(self) -> None: 
         # let # NOTE: previously checked
-        #self.write_terminal()
         self.forward()
         # varName
-        if self.isIdentifier(): # NOTE: changed from isKeywordOrIdentifier
-            #self.write_terminal()
+        if self.isIdentifier():
             name = self.JT.current_token
             index = self.ST.index_of(name)
+            kind = self.ST.kind_of(name).value
             self.forward()
             ## TODO: ([ -> expression -> ])?
             #if self.eat('['):
@@ -478,17 +452,13 @@ class CompilationEngine():
             #        self.write_terminal()
             # =
             if self.eat('='):
-                #self.write_terminal()
                 self.forward()
                 # expression
                 self.compile_expression()
                 # ;
                 if self.eat(';'):
-                    #self.write_terminal()
                     self.forward()
-                    # TODO: change this probably
-                    self.VMW.write_pop('local', index)
-                    self.VMW.write_push('local', index)
+                    self.VMW.write_pop(kind, index)
 
     
     # PURPOSE:  Compiles a return statement.
@@ -496,9 +466,8 @@ class CompilationEngine():
     #@wrap_non_terminal
     def compile_returnStatement(self) -> None: 
         # return # NOTE: previously checked
-        #self.write_terminal()
         self.forward()
-        # TODO: expresssion?
+        # expresssion?
         if not self.eat(';'):
             self.VMW.write_return()
             self.compile_expression()
@@ -507,13 +476,11 @@ class CompilationEngine():
             self.VMW.write_return()
         # ;
         if self.eat(';'):
-            #self.write_terminal()
             self.forward()
 
 
     # PURPOSE:  Compiles a while statement.
     # while -> ( -> expression -> ) -> { -> statements -> }
-    #@wrap_non_terminal
     # TODO: unique labels
     # TODO: negate not according to rules:
     """
@@ -549,21 +516,20 @@ class CompilationEngine():
 
     # PURPOSE:  Compiles an expression.
     # term -> (op -> term)*
-    #@wrap_non_terminal
     def compile_expression(self) -> None:
         # term
         self.compile_term()
         # op*
         while self.isOp():
-            #self.write_terminal()
-            com = self.JT.current_token
+            op = self.JT.current_token
             self.forward()
             # term
             self.compile_term()
-            if com == '*':
+            # TODO: hardcoded behavior
+            if op == '*':
                 self.VMW.write_call('Math.multiply', 2)
             else:
-                self.VMW.write_arithmetic(com)
+                self.VMW.write_arithmetic(op)
     
 
     # PURPOSE: Compiles a term.
@@ -572,30 +538,42 @@ class CompilationEngine():
     # + ( expression ) | + unaryOp term
     #@wrap_non_terminal
     def compile_term(self) -> None:
-        # TODO: stringConstant | integerConstant | keywordConstant
-        if self.isStringConstant() or self.isIntegerConstant() or self.isKeyword():
-            # TODO: add symbol table to search arguments
-            index = self.JT.current_token
-            # TODO: hardcoded behavior
-            if index == 'true':
-                index = 0
-            self.VMW.write_push('constant', index)
+        # integerConstant
+        if self.isIntegerConstant():
+            self.VMW.write_push('constant', self.JT.current_token)
             self.forward()
-            #self.write_terminal()
+        # TODO: stringConstant
+        elif self.isStringConstant():
+            print("STRING CONSTANT")
+            pass
+        # keywordConstant
+        elif self.isKeyword():
+            # TODO: where is 'this' ?
+            # false | null
+            if self.JT.current_token == 'false' or self.JT.current_token == 'null':
+                self.VMW.write_push('constant', 0)
+            # true
+            else:
+                self.VMW.write_push('constant', 0)
+                self.VMW.write_arithmetic('~')
+            self.forward()
         # varName
         elif self.isIdentifier():
-            # TODO: name
+            # TODO: search name in a symbol table, if not found, throw an error
             name = self.JT.current_token
-            #self.write_terminal()
             self.forward()
             # . subroutineCall
             if self.eat('.'):
-                #self.write_terminal()
                 self.termName = name
                 self.termName += self.JT.current_token
                 self.forward()
                 # subroutineCall
                 self.compile_subroutineCall()
+            else:
+                segment = self.ST.kind_of(name).value
+                index = self.ST.index_of(name)
+                self.VMW.write_push(segment, index)
+                # TODO: probably forward is useless
 
             ## TODO: [ expression ]
             #if self.eat('['):
@@ -607,21 +585,19 @@ class CompilationEngine():
             #        self.write_terminal()
         # ( expression )
         elif self.eat('('):
-            #self.write_terminal()
             self.forward()
             # expression
             self.compile_expression()
             # )
             if self.eat(')'):
-                #self.write_terminal()
                 self.forward()
         # unaryOp term
         elif self.isUnaryOp():
-            #self.write_terminal()
+            unaryOp = self.JT.current_token
             self.forward()
             # term
             self.compile_term()
-            self.VMW.write_arithmetic('-')
+            self.VMW.write_arithmetic(unaryOp)
 
 
     # PURPOSE:  Compiles a (possibly empty) comma-separated list of expressions.
@@ -632,7 +608,6 @@ class CompilationEngine():
         while not self.eat(')'):
             # ,
             if self.eat(','):
-                #self.write_terminal()
                 self.forward()
             # expressison
             self.compile_expression()
