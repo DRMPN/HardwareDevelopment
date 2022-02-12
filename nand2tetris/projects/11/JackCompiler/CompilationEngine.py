@@ -211,7 +211,6 @@ class CompilationEngine():
     # PURPOSE:  Compiles a complete class.
     # ASSUMES:  Already has a token to start with.
     # class -> className -> { -> classVarDec* -> subroutineDec* -> }
-    #@wrap_non_terminal
     def compile_class(self) -> None:
         # class
         if self.eat('class'):
@@ -255,7 +254,6 @@ class CompilationEngine():
 
     # PURPOSE:  Compiles a complete method, function, or constructor.
     # constructor | function | method -> void | type -> subroutineName -> ( -> parameterList -> ) -> subroutineBody
-    #@wrap_non_terminal
     def compile_subroutineDec(self) -> None:
         # constructor | function | method # NOTE: previously checked
         # TODO: change behavior for method call
@@ -303,7 +301,6 @@ class CompilationEngine():
 
     # PURPOSE:  Compiles a body of a subroutine.
     # { -> varDec* -> statements -> }
-    #@wrap_non_terminal
     def compile_subroutineBody(self) -> None:
         # {
         if self.eat('{'):
@@ -321,7 +318,6 @@ class CompilationEngine():
 
     # PURPOSE:  Compiles a var declaration.
     # var -> type -> varName -> (, -> varName)* -> ;
-    #@wrap_non_terminal
     def compile_varDec(self) -> None:
         # var
         if self.eat('var'):
@@ -349,7 +345,6 @@ class CompilationEngine():
     
     # PURPOSE:  Compiles a sequence of statements, not including theenclosing {}.
     # statement*
-    #@wrap_non_terminal
     def compile_statements(self) -> None:
         # statement*
         while True:
@@ -369,18 +364,18 @@ class CompilationEngine():
 
     # PURPOSE:  Compiles a do statement.
     # do -> subroutineCall -> ;
-    #@wrap_non_terminal
     def compile_doStatement(self) -> None: 
         # do # NOTE: previously checked
         self.forward()
         # subroutineCall
         if self.isIdentifier():
+            if self.ST.type_of(self.JT.current_token) is not None:
+                self.VMW.write_push('local', 0)
             self.termName = ''
             self.compile_subroutineCall()
             # ;
             if self.eat(';'):
-                # TODO: temp cuz 0 in stack?
-                self.VMW.write_pop('temp', 0)
+                self.VMW.write_pop('temp', 0) # TODO: temp cuz 0 in stack?
                 self.forward()
 
 
@@ -390,7 +385,13 @@ class CompilationEngine():
     # className | varName -> . -> subroutineName -> ( -> expressionList-> )
     def compile_subroutineCall(self) -> None:
         # subroutineName | className | varName # NOTE: previously checked
-        self.termName += self.JT.current_token
+        self.numArgs = 0
+        className = self.ST.type_of(self.JT.current_token)
+        if className is not None:
+            self.termName += className
+            self.numArgs += 1
+        else:
+            self.termName += self.JT.current_token
         self.forward()
         # .
         if self.eat('.'):
@@ -456,7 +457,6 @@ class CompilationEngine():
 
     # PURPOSE:  Compiles a let statement.
     # let -> varName -> ([ -> expression -> ])? -> = -> expression -> ;
-    #@wrap_non_terminal
 
     # TODO: look up each variable in symbol table, if not found, throw an error
 
@@ -620,7 +620,6 @@ class CompilationEngine():
     # PURPOSE:  Compiles a (possibly empty) comma-separated list of expressions.
     # ( expression -> (, -> expression)* )?
     def compile_expressionList(self) -> None:
-        self.numArgs = 0
         while not self.eat(')'):
             # ,
             if self.eat(','):
