@@ -17,7 +17,7 @@ from xmlrpc.client import Boolean
 
 # TODO: rename to segments?
 class STKind(Enum):
-    FIELD = 'field'
+    FIELD = 'this'
     STATIC = 'static'
     ARG = 'argument'
     VAR = 'local'
@@ -31,19 +31,19 @@ class SymbolTable():
     # PURPOSE: Creates a new empty symbol table.
     def __init__(self) -> None:
         self.runningIndex = 0
-        # list of dictionaries
-        self.classTable = []
+        self.previousKind = None
+        self.classTable = [] # list of dictionaries
 
     
     # PURPOSE: Checks whether or not passed kind is in class scope.
     # RETURNS: bool
-    def is_class_scope(self, kind) -> bool:
+    def is_class_scope(self, kind: STKind) -> bool:
         return kind == STKind.FIELD or kind == STKind.STATIC
 
     
     # PURPOSE: Checks whether or not passed kind is in subroutine scope.
     # RETURNS: bool 
-    def is_subroutine_scope(self, kind) -> bool:
+    def is_subroutine_scope(self, kind: STKind) -> bool:
         return kind == STKind.ARG or kind == STKind.VAR
 
     
@@ -82,7 +82,7 @@ class SymbolTable():
     # PURPOSE: Returns the number of variables of the given kind 
     #          already defined in the current scope.
     # RETURNS: int
-    def var_count(self, kind: str) -> int:
+    def var_count(self, kind: STKind) -> int:
         count = 0
 
         if self.is_class_scope(kind):

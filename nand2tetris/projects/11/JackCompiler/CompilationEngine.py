@@ -57,6 +57,7 @@ class CompilationEngine():
         self.indent_level = 0  # indentation level
 
         self.className = None # name of the current compiling class
+        self.subrouniteType = None # type of the current compiling subroutine
         self.subrouniteName = None # name of the current compiling subroutine
         self.termName = None # name of the current compiling term
         self.numArgs = 0 # amount of function arguments
@@ -222,34 +223,43 @@ class CompilationEngine():
                 # {
                 if self.eat('{'):
                     self.forward()
-
-                    ## TODO: classVarDec*
-                    #while self.eat('static') or self.eat('field'):
-                    #    self.compile_classVarDec()
-
-                    # subroutineDec*
-                    while self.eat('constructor') or self.eat('function') or self.eat('method'):
+                    # classVarDec*
+                    while self.eat('static') or self.eat('field'):
+                        self.compile_classVarDec()
+                    
+                    # TODO: subroutineDec*
+                    while self.eat('method') or self.eat('function') or self.eat('constructor'):
+                        self.subrouniteType = self.JT.current_token
                         self.compile_subroutineDec()
+                    
                     if self.eat('}'):
                         self.forward()
 
 
     # PURPOSE:  Compiles a static declaration or a field declaration.
     # static | field -> type -> varName -> (, -> varName )* -> ;
-    @wrap_non_terminal
     def compile_classVarDec(self) -> None:
         # static | field # NOTE: previously checked
-        self.write_terminal()
+        if self.eat('static'):
+            kind = STKind.STATIC
+        elif self.eat('field'):
+            kind = STKind.FIELD
+        self.forward()
         # type
         if self.isKeywordOrIdentifier():
-            self.write_terminal()
+            type_ = self.JT.current_token
+            self.forward()
             # varName
             if self.isIdentifier():
-                self.write_terminal()
+                name = self.JT.current_token
+                self.forward()
+                self.ST.define(name, type_, kind)
                 # (, -> varName )*
                 while not(self.eat(';')):
-                    self.write_terminal()
-                self.write_terminal()
+                    name = self.JT.current_token
+                    self.ST.define(name, type_, kind)
+                    self.forward()
+                self.forward()
     
 
     # PURPOSE:  Compiles a complete method, function, or constructor.
@@ -309,6 +319,12 @@ class CompilationEngine():
             while self.eat('var'):
                 self.compile_varDec()
             self.VMW.write_function(f'{self.className}.{self.subrouniteName}', self.ST.var_count(STKind.VAR))
+
+            if self.subrouniteType == 'constructor':
+                self.VMW.write_push('constant', self.ST.var_count(STKind.FIELD))
+                self.VMW.write_call('Memory.alloc', 1) # one argument
+                self.VMW.write_pop('pointer', 0)
+
             # statements
             self.compile_statements()
             # }
@@ -564,10 +580,11 @@ class CompilationEngine():
             pass
         # keywordConstant
         elif self.isKeyword():
-            # TODO: where is 'this' ?
             # false | null
             if self.JT.current_token == 'false' or self.JT.current_token == 'null':
                 self.VMW.write_push('constant', 0)
+            elif self.JT.current_token == 'this':
+                self.VMW.write_push('pointer', 0)
             # true
             else:
                 self.VMW.write_push('constant', 0)
