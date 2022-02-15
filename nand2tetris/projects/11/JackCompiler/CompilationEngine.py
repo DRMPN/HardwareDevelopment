@@ -325,6 +325,10 @@ class CompilationEngine():
                 self.VMW.write_call('Memory.alloc', 1) # one argument
                 self.VMW.write_pop('pointer', 0)
 
+            if self.subrouniteType == 'method':
+                self.VMW.write_push('argument', 0)
+                self.VMW.write_pop('pointer', 0)
+
             # statements
             self.compile_statements()
             # }
@@ -385,8 +389,10 @@ class CompilationEngine():
         self.forward()
         # subroutineCall
         if self.isIdentifier():
+            # TODO: write logic: subroutineCall and compile_term
             if self.ST.type_of(self.JT.current_token) is not None:
-                self.VMW.write_push('local', 0)
+                kind = self.ST.kind_of(self.JT.current_token)
+                self.VMW.write_push(kind.value, 0)
             self.termName = ''
             self.compile_subroutineCall()
             # ;
@@ -403,6 +409,7 @@ class CompilationEngine():
         # subroutineName | className | varName # NOTE: previously checked
         self.numArgs = 0
         className = self.ST.type_of(self.JT.current_token)
+        # TODO: write logic: do statement and compileTerm
         if className is not None:
             self.termName += className
             self.numArgs += 1
@@ -417,6 +424,10 @@ class CompilationEngine():
             if self.isIdentifier():
                 self.termName += self.JT.current_token
                 self.forward()
+        if not '.' in self.termName: # called function corresponds to a method
+            self.VMW.write_push('pointer', 0)
+            self.termName = f'{self.className}.{self.termName}' 
+            self.numArgs += 1
         # (
         if self.eat('('):
             self.forward()
@@ -455,9 +466,9 @@ class CompilationEngine():
                     # }
                     if self.eat('}'):
                         self.forward()
-                    self.VMW.write_goto(L3) # goto end
                     # else
                     if self.eat('else'):
+                        self.VMW.write_goto(L3) # goto end
                         self.VMW.write_label(L2) # else
                         self.forward()
                         # {
@@ -468,7 +479,9 @@ class CompilationEngine():
                             # }
                             if self.eat('}'):
                                 self.forward()
-                    self.VMW.write_label(L3) # end
+                                self.VMW.write_label(L3) # label end
+                    else: # no else
+                        self.VMW.write_label(L2) # label false
 
 
     # PURPOSE:  Compiles a let statement.
@@ -597,6 +610,7 @@ class CompilationEngine():
             self.forward()
             # . subroutineCall
             if self.eat('.'):
+                # TODO: write logic: do statement and subroutineCall
                 self.termName = name
                 self.termName += self.JT.current_token
                 self.forward()
